@@ -20,24 +20,26 @@ Encoding
 j
 
 ### group 1 (s1)
-x | 0 | 1 | 2 | 3 
-- | - | - | - | - 
-0 | draw | movh | mov | beq 
-4 | bgt | ba | ? | ?
+ x  |  0   |  1   |  2  |  3 
+--- | ---  | ---  | --- | --- 
+ 0  | draw | movh | mov | beq 
+ 4  | bgt  |  ba  |  ?  | ?
 
 ### group 2 (s2)
-x | 0 | 1 | 2 | 3 
-- | - | - | - | - 
-0 | mov | add | sub | and 
-4 | or | xor | shl | shr 
-8 | not | neg | readm | writem
-C | ? | ? | ? | ?
+x   |  0  |  1  |  2  | 3 
+--- | --- | --- | --- | --- 
+ 0  | mov | add | sub | and 
+ 4  | or  | xor | shl | shr 
+ 8  | not | neg | readm | writem
+ C  |  ?  |  ?  |  ?  | ?
 
 ### group 3 (s3)
 jr
 
 ### group 4 (s4)
 wait
+
+### Encoding table
 
 Group | bits                        |   START | END 
 ----- | ----                        |   ---  | ----
