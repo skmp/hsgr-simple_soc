@@ -1,7 +1,6 @@
 Opcodes
 -------
 #### j - imm15
-Jump direct
 pc = u15(imm15)
 #### draw s1, s2, s3
 vram[s1,s2] = s3;
