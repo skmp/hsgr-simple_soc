@@ -1,18 +1,44 @@
 Opcodes
 -------
-* j - imm15
-* draw s1, s2, s3
-* movh d,imm8
-* mov d,imm8
-* beq, bgt, ba: s1, s2, imm4
-* add, sub, and, or, xor: d, s1
-* shl, shr: d, imm4
-* not, neg: d, s
-* mov d,s
-* readm d, s
-* writem d, s
-* jr s
-* wait
+#### j - imm15
+Jump direct
+pc = u15(imm15)
+#### draw s1, s2, s3
+vram[s1,s2] = s3;
+#### movh d,imm8
+r[d] = (r[d] & 0x00FF) | (u8(imm8) << 8);
+#### mov d,imm8
+r[d] = u8(imm8)
+### beq s1, s2, imm4
+if (r[s1] == r[s2]) pc += s4(imm4) * 2;
+### bgt s1, s2, imm4
+if (s16(r[s1]) > s16(r[s2])) pc += s4(imm4) * 2;
+### ba s1, s2, imm4
+if (u16(r[s1]) > u16(r[s2])) pc += s4(imm4) * 2;
+#### [add, sub, and, or, xor] d, s1
+r[d] = r[d] op r[s1]
+#### [shl, shr] d, imm4
+r[d] = r[d] op u4(imm4)
+#### sar d,imm4
+r[d] = s16(r[d]) >> u4(imm4)
+#### [not, neg] d, s
+r[d] = r[d] op imm4
+#### mov d,s
+r[d] = r[s]
+#### read_s8 d, s
+r[d] = s8(mem8[s])
+#### read_u8 d, s
+r[d] = u8(mem8[s])
+#### read_16 d, s
+r[d] = mem16[s>>1]
+#### write_8 d, s
+mem8[s] = r[d]
+#### write_16 d, s
+mem16[s>>1] = r[d]
+#### jr s
+pc = r[s]
+#### wait
+wait for interrupt
 
 Encoding
 --------
