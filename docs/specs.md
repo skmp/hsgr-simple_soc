@@ -15,8 +15,7 @@ cpu
 * 16 registers
 * 16 bit address bus
 * dedicated vga bus
-* 4K rom x16 bits
-* 4K ram x16 bits
+* 8K ram x16 bits
 
 for more details check the docs/cpu folder
 
