@@ -65,11 +65,11 @@
             // txtCode
             // 
             this.txtCode.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtCode.Location = new System.Drawing.Point(76, 6);
+            this.txtCode.Location = new System.Drawing.Point(6, 6);
             this.txtCode.Multiline = true;
             this.txtCode.Name = "txtCode";
             this.txtCode.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtCode.Size = new System.Drawing.Size(384, 472);
+            this.txtCode.Size = new System.Drawing.Size(384, 484);
             this.txtCode.TabIndex = 0;
             this.txtCode.Text = resources.GetString("txtCode.Text");
             // 
@@ -115,7 +115,7 @@
             // colHError
             // 
             this.colHError.Text = "";
-            this.colHError.Width = 200;
+            this.colHError.Width = 300;
             // 
             // tctMain
             // 

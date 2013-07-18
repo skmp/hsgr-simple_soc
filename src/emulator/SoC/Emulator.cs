@@ -87,114 +87,106 @@ namespace SoC
         public void Step()
         {
             breakFlag = false;
-            
+
             Opcode op = Program[ProgramCounter];
-            if (op.Command == "j")
+            switch (op.Command)
             {
-                FireProgramCounterChanged(ProgramCounter, op.Imm15);
-                SetProgramCounter(op.Imm15);
-            }
-            else if (op.Command == "movh")
-            {
-                SetRegister(op.Register1.Number, (Register[op.Register1.Number] & 0xFF) | ((op.Imm8 & 0xFF) << 8));
-                IncreaseProgramCounter();
-            }
-            else if (op.Command == "movl")
-            {
-                SetRegister(op.Register1.Number, (Register[op.Register1.Number] & 0xFF00) | (op.Imm8 & 0xFF));
-                IncreaseProgramCounter();
-            }
-            else if (op.Command == "mov")
-            {
-                SetRegister(op.Register1.Number, Register[op.Register2.Number] & 0xFFFF);
-                IncreaseProgramCounter();
-            }
-            else if (op.Command == "add")
-            {
-                SetRegister(op.Register1.Number, (Register[op.Register1.Number] + Register[op.Register2.Number]) & 0xFFFF);
-                IncreaseProgramCounter();
-            }
-            else if (op.Command == "sub")
-            {
-                SetRegister(op.Register1.Number, (Register[op.Register1.Number] - Register[op.Register2.Number]) & 0xFFFF);
-                IncreaseProgramCounter();
-            }
-            else if (op.Command == "and")
-            {
-                SetRegister(op.Register1.Number, (Register[op.Register1.Number] & Register[op.Register2.Number]) & 0xFFFF);
-                IncreaseProgramCounter();
-            }
-            else if (op.Command == "or")
-            {
-                SetRegister(op.Register1.Number, (Register[op.Register1.Number] | Register[op.Register2.Number]) & 0xFFFF);
-                IncreaseProgramCounter();
-            }
-            else if (op.Command == "xor")
-            {
-                SetRegister(op.Register1.Number, (Register[op.Register1.Number] ^ Register[op.Register2.Number]) & 0xFFFF);
-                IncreaseProgramCounter();
-            }
-            else if (op.Command == "shl")
-            {
-                SetRegister(op.Register1.Number, (Register[op.Register1.Number] << op.Imm4) & 0xFFFF);
-                IncreaseProgramCounter();
-            }
-            else if (op.Command == "shr")
-            {
-                SetRegister(op.Register1.Number, (Register[op.Register1.Number] >> op.Imm4) & 0xFFFF);
-                IncreaseProgramCounter();
-            }
-            else if (op.Command == "xor")
-            {
-                SetRegister(op.Register1.Number, (Register[op.Register1.Number] ^ Register[op.Register2.Number]) & 0xFFFF);
-                IncreaseProgramCounter();
-            }
-            else if (op.Command == "not")
-            {
-                SetRegister(op.Register1.Number, (Register[op.Register1.Number] ^0x8000)& 0xFFFF);
-                IncreaseProgramCounter();
-            }
-            else if (op.Command == "neg")
-            {
-                SetRegister(op.Register1.Number, (Register[op.Register1.Number] ^ 0xFFFF) & 0xFFFF);
-                IncreaseProgramCounter();
-            }
-            else if (op.Command == "beq")
-            {
-                if (Register[op.Register1.Number] == Register[op.Register2.Number])
-                    SetProgramCounter(ProgramCounter + op.Imm4);
-                else
+                case Command.j:
+                    FireProgramCounterChanged(ProgramCounter, op.Imm15);
+                    SetProgramCounter(op.Imm15);
+                    break;
+                case Command.draw:
+                    break;
+                case Command.movh:
+                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] & 0xFF) | ((op.Imm8 & 0xFF) << 8));
                     IncreaseProgramCounter();
-            }
-            else if (op.Command == "bgt")
-            {
-                if (Register[op.Register1.Number] > Register[op.Register2.Number])
-                    SetProgramCounter(ProgramCounter + op.Imm4);
-                else
+                    break;
+                case Command.movl:
+                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] & 0xFF00) | (op.Imm8 & 0xFF));
                     IncreaseProgramCounter();
-            }
-            else if (op.Command == "ba")
-            {
-                if (Register[op.Register1.Number] > Register[op.Register2.Number])
-                    SetProgramCounter(ProgramCounter - op.Imm4);
-                else
+                    break;
+                case Command.beq:
+                    if (Register[op.Register1.Number] == Register[op.Register2.Number])
+                        SetProgramCounter(ProgramCounter + op.Imm4);
+                    else
+                        IncreaseProgramCounter();
+                    break;
+                case Command.bgt:  // Signed compare
+                    int s1 = (Register[op.Register1.Number] > 32767) ? -((~(Register[op.Register1.Number] - 1)) & 0xffff) : Register[op.Register1.Number];
+                    int s2 = (Register[op.Register2.Number] > 32767) ? -((~(Register[op.Register2.Number] - 1)) & 0xffff) : Register[op.Register2.Number];
+                    if (s1 > s2)
+                        SetProgramCounter(ProgramCounter + op.Imm4);
+                    else
+                        IncreaseProgramCounter();
+                    break;
+                case Command.ba:  // Unsigned compare
+                    if (Register[op.Register1.Number] > Register[op.Register2.Number])
+                        SetProgramCounter(ProgramCounter + op.Imm4);
+                    else
+                        IncreaseProgramCounter();
+                    break;
+                case Command.mov:
+                    SetRegister(op.Register1.Number, Register[op.Register2.Number] & 0xFFFF);
                     IncreaseProgramCounter();
-            }
-            else if (op.Command == "jr")
-            {
-                SetProgramCounter(Register[op.Register1.Number]);
-            }
-            else if (op.Command == "wait")
-            {
-                // wait for a half second
-                Thread.Sleep(500);
-            }
-            //list.Add(new Opcode("draw", 0x0000, new OpcodeType[] { OpcodeType.ThreeArg_RegRegReg }, false));
-            //list.Add(new Opcode("readm", 0x6a00, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
-            //list.Add(new Opcode("writem", 0x6b00, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
-            else
-            {
-                IncreaseProgramCounter();
+                    break;
+                case Command.add:
+                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] + Register[op.Register2.Number]) & 0xFFFF);
+                    IncreaseProgramCounter();
+                    break;
+                case Command.sub:
+                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] - Register[op.Register2.Number]) & 0xFFFF);
+                    IncreaseProgramCounter();
+                    break;
+                case Command.and:
+                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] & Register[op.Register2.Number]) & 0xFFFF);
+                    IncreaseProgramCounter();
+                    break;
+                case Command.or:
+                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] | Register[op.Register2.Number]) & 0xFFFF);
+                    IncreaseProgramCounter();
+                    break;
+                case Command.xor:
+                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] ^ Register[op.Register2.Number]) & 0xFFFF);
+                    IncreaseProgramCounter();
+                    break;
+                case Command.shl:
+                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] << op.Imm4) & 0xFFFF);
+                    IncreaseProgramCounter();
+                    break;
+                case Command.shr:
+                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] >> op.Imm4) & 0xFFFF);
+                    IncreaseProgramCounter();
+                    break;
+                case Command.not:
+                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] ^ 0x8000) & 0xFFFF);
+                    IncreaseProgramCounter();
+                    break;
+                case Command.neg:
+                    SetRegister(op.Register1.Number, ((Register[op.Register1.Number] ^ 0xFFFF) + 1) & 0xFFFF);
+                    IncreaseProgramCounter();
+                    break;
+                case Command.readm:
+                    IncreaseProgramCounter();
+                    break;
+                case Command.writem:
+                    IncreaseProgramCounter();
+                    break;
+                case Command.jr:
+                    SetProgramCounter(Register[op.Register1.Number]);
+                    break;
+                case Command.wait:
+                    // wait for a half second
+                    Thread.Sleep(500);
+                    IncreaseProgramCounter();
+                    break;
+                case Command.org:
+                    throw new Exception("Internal: Pseudo opcode ORG should never be possible");
+                case Command.li:
+                    throw new Exception("Internal: Pseudo opcode LI should never be possible");
+                case Command.jrl:
+                    throw new Exception("Internal: Pseudo opcode JRL should never be possible");
+                default:
+                    throw new Exception("Internal: Unhandled command: " + op.Command.ToString());
             }
         }
 

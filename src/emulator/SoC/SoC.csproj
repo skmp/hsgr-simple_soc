@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArrayList.cs" />
     <Compile Include="Assembler.cs" />
     <Compile Include="Emulator.cs" />
     <Compile Include="EmulatorDisplay.cs">
@@ -54,6 +55,7 @@
     <Compile Include="EmulatorDisplay.Designer.cs">
       <DependentUpon>EmulatorDisplay.cs</DependentUpon>
     </Compile>
+    <Compile Include="Entities\Command.cs" />
     <Compile Include="Entities\Line.cs" />
     <Compile Include="Entities\Opcode.cs" />
     <Compile Include="Entities\OpcodeDictionary.cs" />

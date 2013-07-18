@@ -130,7 +130,17 @@
          MOVL r1, 0x20
 
 
-         LI r2,0xabcd
+         LI r7, 0xffff
+         LI r8, 0xf0
+         BGT r7,r8 lbl
+         mov r9,r8
+
+
+lbl      BA r7,r8, lbl2
+
+         mov r9,r8
+
+lbl2     LI r2,0xabcd
 
 init     ADD r0, r1
          MOV r3, r0

@@ -8,7 +8,7 @@ namespace SoC.Entities
     public class Opcode : ICloneable
     {
         // the opcode definition parts
-        public string Command { get; private set; }
+        public Command Command { get; private set; }
         public int Value { get; private set; }
         public OpcodeType[] ApplicableTypes { get; private set; }
         public bool Pseudo { get; private set; }
@@ -17,7 +17,7 @@ namespace SoC.Entities
         public Line SourceLine { get; private set; }
 
         // the opcode values. label, type, arguments
-        public string Label { get; private set; }
+        public string Label { get; set; }
         public OpcodeType Type { get; set; }
 
         #region public Register Register1
@@ -103,8 +103,8 @@ namespace SoC.Entities
 
 
         // constructor
-        #region public Opcode(string s, OpcodeType[] t, bool pseudo)
-        public Opcode(string command, int value, OpcodeType[] applicableTypes, bool pseudo)
+        #region public Opcode(string command, int value, OpcodeType[] applicableTypes, bool pseudo)
+        public Opcode(Command command, int value, OpcodeType[] applicableTypes, bool pseudo)
         {
             Command = command;
             Value = value;
@@ -122,7 +122,9 @@ namespace SoC.Entities
                 case OpcodeType.ThreeArg_RegRegReg:
                     return Convert.ToUInt16(Value | (Register1.Number << 8) | (Register2.Number << 4) | (Register3.Number << 0));
                 case OpcodeType.ThreeArg_RegRegImm4:
-                    return Convert.ToUInt16(Value | (Register1.Number << 8) | (Register2.Number << 4) | (Imm4 << 0));
+                    // Imm4 can be a signed number  -- generate 2's complement
+                    int i4 = (Imm4 < 0) ? (~Imm4 + 1) & 0x000f : Imm4 & 0x000f;
+                    return Convert.ToUInt16(Value | (Register1.Number << 8) | (Register2.Number << 4) | (i4 << 0));
                 case OpcodeType.ThreeArg_RegRegImm4label:
                     return Convert.ToUInt16(Value | (Register1.Number << 8) | (Register2.Number << 4) | 0); // Label is set as zero
                 case OpcodeType.TwoArg_RegReg:
@@ -156,7 +158,7 @@ namespace SoC.Entities
                 case OpcodeType.ThreeArg_RegRegReg:
                     return lbl + " " + Command + " " + Register1.Name + ", " + Register2.Name + ", " + Register3.Name;
                 case OpcodeType.ThreeArg_RegRegImm4:
-                    return lbl + " " + Command + " " + Register1.Name + ", " + Register2.Name + ", " + Imm4.ToString("X");
+                     return lbl + " " + Command + " " + Register1.Name + ", " + Register2.Name + ", " + Imm4.ToString(); // Imm4 is signed
                 case OpcodeType.ThreeArg_RegRegImm4label:
                     return lbl + " " + Command + " " + Register1.Name + ", " + Register2.Name + ", " + Imm4label;
                 case OpcodeType.TwoArg_RegReg:

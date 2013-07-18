@@ -118,7 +118,7 @@ namespace SoC
                     labels.Add(binary[addr].Label, addr);
 
                 if (binary[addr].Type == OpcodeType.TwoArg_RegImm16label ||
-                        binary[addr].Type == OpcodeType.TwoArg_RegImm8_label16h || binary[addr].Type == OpcodeType.TwoArg_RegImm8_label16l)
+                        binary[addr].Type == OpcodeType.TwoArg_RegImm16label_h || binary[addr].Type == OpcodeType.TwoArg_RegImm16label_l)
                     argImm16Labels.Add(new RomItem(addr, binary[addr]));
                 if (binary[addr].Type == OpcodeType.OneArg_Imm15label)
                     argImm15Labels.Add(new RomItem(addr, binary[addr]));
@@ -137,11 +137,11 @@ namespace SoC
                             ri.Opcode.Imm16 = labels[ri.Opcode.Imm16label];
                             ri.Opcode.Type = OpcodeType.TwoArg_RegImm16;
                             break;
-                        case OpcodeType.TwoArg_RegImm8_label16h:
+                        case OpcodeType.TwoArg_RegImm16label_h:
                             ri.Opcode.Imm8 = labels[ri.Opcode.Imm16label] >> 8;
                             ri.Opcode.Type = OpcodeType.TwoArg_RegImm8;
                             break;
-                        case OpcodeType.TwoArg_RegImm8_label16l:
+                        case OpcodeType.TwoArg_RegImm16label_l:
                             ri.Opcode.Imm8 = labels[ri.Opcode.Imm16label] & 0xFF;
                             ri.Opcode.Type = OpcodeType.TwoArg_RegImm8;
                             break;
@@ -149,7 +149,7 @@ namespace SoC
                 }
                 catch (KeyNotFoundException)
                 {
-                    ri.Opcode.SourceLine.SetError("Label [" + ri.Opcode.Imm15label + "] cannot be found");
+                    ri.Opcode.SourceLine.SetError("Label [" + ri.Opcode.Imm16label + "] cannot be found");
                 }
             }
 
@@ -158,8 +158,17 @@ namespace SoC
             {
                 try
                 {
-                    ri.Opcode.Imm15 = labels[ri.Opcode.Imm15label];
-                    ri.Opcode.Type = OpcodeType.OneArg_Imm15;
+                    int address = labels[ri.Opcode.Imm15label];
+
+                    if (address > Math.Pow(2, 15))
+                    {
+                        ri.Opcode.SourceLine.SetError("Label [" + ri.Opcode.Imm15label + "] is too far to jump to");
+                    }
+                    else
+                    {
+                        ri.Opcode.Imm15 = address;
+                        ri.Opcode.Type = OpcodeType.OneArg_Imm15;
+                    }
                 }
                 catch (KeyNotFoundException)
                 {
@@ -174,21 +183,13 @@ namespace SoC
                 {
                     int diff = labels[ri.Opcode.Imm4label] - ri.Address;
 
-                    if (ri.Opcode.Command == "ba" && diff >= 0)
-                    {
-                        ri.Opcode.SourceLine.SetError("Label [" + ri.Opcode.Imm4label + "] must be before the current address");
-                    }
-                    else if (ri.Opcode.Command != "ba" && diff <= 0)
-                    {
-                        ri.Opcode.SourceLine.SetError("Label [" + ri.Opcode.Imm4label + "] must be after the current address");
-                    }
-                    else if (diff < -15 || diff > 15)
+                    if (diff < -8 || diff > 7)
                     {
                         ri.Opcode.SourceLine.SetError("Label [" + ri.Opcode.Imm4label + "] is too far from the current address");
                     }
                     else
                     {
-                        ri.Opcode.Imm4 = Math.Abs(diff);
+                        ri.Opcode.Imm4 = diff;
                         ri.Opcode.Type = OpcodeType.ThreeArg_RegRegImm4;
                     }
                 }
@@ -205,16 +206,19 @@ namespace SoC
             ArrayList arl = new ArrayList();
             RomItem ri;
 
-            if (op.Command == "org")     // ORiGin
+            if (op.Command == Command.org)     // ORiGin
             {
                 address = op.Imm16;
+                if (!String.IsNullOrEmpty(op.Label))
+                    op.SourceLine.SetError("ORG command is not allowed to have a label");
             }
-            else if (op.Command == "li") // Load Immediate
+            else if (op.Command == Command.li) // Load Immediate
             {
                 ri = new RomItem(address, OpcodeDictionary.Get("movh"));
                 ri.Opcode.Register1 = op.Register1;
                 ri.Opcode.Imm8 = op.Imm16 >> 8;
                 ri.Opcode.Type = OpcodeType.TwoArg_RegImm8;
+                ri.Opcode.Label = op.Label;
                 ri.Opcode.SetSourceLine(op.SourceLine);
                 arl.Add(ri);
                 address++;
@@ -227,13 +231,14 @@ namespace SoC
                 arl.Add(ri);
                 address++;
             }
-            else if (op.Command == "jrl") // JumpRegisterLabel
+            else if (op.Command == Command.jrl) // JumpRegisterLabel
             {
                 ri = new RomItem(address, OpcodeDictionary.Get("movh"));
                 ri.Opcode.Register1 = op.Register1;
                 //ri.Opcode.Imm8 = op.Imm16 >> 8;
                 ri.Opcode.Imm16label = op.Imm16label;
-                ri.Opcode.Type = OpcodeType.TwoArg_RegImm8_label16h;
+                ri.Opcode.Type = OpcodeType.TwoArg_RegImm16label_h;
+                ri.Opcode.Label = op.Label;
                 ri.Opcode.SetSourceLine(op.SourceLine);
                 arl.Add(ri);
                 address++;
@@ -242,7 +247,7 @@ namespace SoC
                 ri.Opcode.Register1 = op.Register1;
                 //ri.Opcode.Imm8 = op.Imm16 & 0xFF;
                 ri.Opcode.Imm16label = op.Imm16label;
-                ri.Opcode.Type = OpcodeType.TwoArg_RegImm8_label16l;
+                ri.Opcode.Type = OpcodeType.TwoArg_RegImm16label_l;
                 ri.Opcode.SetSourceLine(op.SourceLine);
                 arl.Add(ri);
                 address++;

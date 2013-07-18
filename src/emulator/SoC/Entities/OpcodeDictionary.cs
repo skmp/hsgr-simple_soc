@@ -12,36 +12,36 @@ namespace SoC.Entities
         static OpcodeDictionary()
         {
             List<Opcode> list = new List<Opcode>();
-            list.Add(new Opcode("j", 0x8000, new OpcodeType[] { OpcodeType.OneArg_Imm15, OpcodeType.OneArg_Imm15label }, false));
-            list.Add(new Opcode("draw", 0x0000, new OpcodeType[] { OpcodeType.ThreeArg_RegRegReg }, false));
-            list.Add(new Opcode("movh", 0x1000, new OpcodeType[] { OpcodeType.TwoArg_RegImm8 }, false));
-            list.Add(new Opcode("movl", 0x2000, new OpcodeType[] { OpcodeType.TwoArg_RegImm8 }, false));
-            list.Add(new Opcode("beq", 0x3000, new OpcodeType[] { OpcodeType.ThreeArg_RegRegImm4, OpcodeType.ThreeArg_RegRegImm4label }, false));
-            list.Add(new Opcode("bgt", 0x4000, new OpcodeType[] { OpcodeType.ThreeArg_RegRegImm4, OpcodeType.ThreeArg_RegRegImm4label }, false));
-            list.Add(new Opcode("ba", 0x5000, new OpcodeType[] { OpcodeType.ThreeArg_RegRegImm4, OpcodeType.ThreeArg_RegRegImm4label }, false));
-            list.Add(new Opcode("mov", 0x6000, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
-            list.Add(new Opcode("add", 0x6100, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
-            list.Add(new Opcode("sub", 0x6200, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
-            list.Add(new Opcode("and", 0x6300, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
-            list.Add(new Opcode("or", 0x6400, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
-            list.Add(new Opcode("xor", 0x6500, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
-            list.Add(new Opcode("shl", 0x6600, new OpcodeType[] { OpcodeType.TwoArg_RegImm4 }, false));
-            list.Add(new Opcode("shr", 0x6700, new OpcodeType[] { OpcodeType.TwoArg_RegImm4 }, false));
-            list.Add(new Opcode("not", 0x6800, new OpcodeType[] { OpcodeType.OneArg_Reg }, false));
-            list.Add(new Opcode("neg", 0x6900, new OpcodeType[] { OpcodeType.OneArg_Reg }, false));
-            list.Add(new Opcode("readm", 0x6a00, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
-            list.Add(new Opcode("writem", 0x6b00, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
-            list.Add(new Opcode("jr", 0x6c00, new OpcodeType[] { OpcodeType.OneArg_Reg }, false));
-            list.Add(new Opcode("wait", 0x6c10, new OpcodeType[] { OpcodeType.ZeroArg }, false));
+            list.Add(new Opcode(Command.j, 0x8000, new OpcodeType[] { OpcodeType.OneArg_Imm15, OpcodeType.OneArg_Imm15label }, false));
+            list.Add(new Opcode(Command.draw, 0x0000, new OpcodeType[] { OpcodeType.ThreeArg_RegRegReg }, false));
+            list.Add(new Opcode(Command.movh, 0x1000, new OpcodeType[] { OpcodeType.TwoArg_RegImm8 }, false));
+            list.Add(new Opcode(Command.movl, 0x2000, new OpcodeType[] { OpcodeType.TwoArg_RegImm8 }, false));
+            list.Add(new Opcode(Command.beq, 0x3000, new OpcodeType[] { OpcodeType.ThreeArg_RegRegImm4, OpcodeType.ThreeArg_RegRegImm4label }, false));
+            list.Add(new Opcode(Command.bgt, 0x4000, new OpcodeType[] { OpcodeType.ThreeArg_RegRegImm4, OpcodeType.ThreeArg_RegRegImm4label }, false));
+            list.Add(new Opcode(Command.ba, 0x5000, new OpcodeType[] { OpcodeType.ThreeArg_RegRegImm4, OpcodeType.ThreeArg_RegRegImm4label }, false));
+            list.Add(new Opcode(Command.mov, 0x6000, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
+            list.Add(new Opcode(Command.add, 0x6100, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
+            list.Add(new Opcode(Command.sub, 0x6200, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
+            list.Add(new Opcode(Command.and, 0x6300, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
+            list.Add(new Opcode(Command.or, 0x6400, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
+            list.Add(new Opcode(Command.xor, 0x6500, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
+            list.Add(new Opcode(Command.shl, 0x6600, new OpcodeType[] { OpcodeType.TwoArg_RegImm4 }, false));
+            list.Add(new Opcode(Command.shr, 0x6700, new OpcodeType[] { OpcodeType.TwoArg_RegImm4 }, false));
+            list.Add(new Opcode(Command.not, 0x6800, new OpcodeType[] { OpcodeType.OneArg_Reg }, false));
+            list.Add(new Opcode(Command.neg, 0x6900, new OpcodeType[] { OpcodeType.OneArg_Reg }, false));
+            list.Add(new Opcode(Command.readm, 0x6a00, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
+            list.Add(new Opcode(Command.writem, 0x6b00, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
+            list.Add(new Opcode(Command.jr, 0x6c00, new OpcodeType[] { OpcodeType.OneArg_Reg }, false));
+            list.Add(new Opcode(Command.wait, 0x6c10, new OpcodeType[] { OpcodeType.ZeroArg }, false));
 
-            list.Add(new Opcode("org", -1, new OpcodeType[] { OpcodeType.OneArg_Imm16 }, true));         // ORiGin
-            list.Add(new Opcode("li", -1, new OpcodeType[] { OpcodeType.TwoArg_RegImm16 }, true));       // LoadImmediate
-            list.Add(new Opcode("jrl", -1, new OpcodeType[] { OpcodeType.TwoArg_RegImm16, OpcodeType.TwoArg_RegImm16label }, true)); // JumpRegisterLabel
+            list.Add(new Opcode(Command.org, -1, new OpcodeType[] { OpcodeType.OneArg_Imm16 }, true));         // ORiGin
+            list.Add(new Opcode(Command.li, -1, new OpcodeType[] { OpcodeType.TwoArg_RegImm16 }, true));       // LoadImmediate
+            list.Add(new Opcode(Command.jrl, -1, new OpcodeType[] { OpcodeType.TwoArg_RegImm16, OpcodeType.TwoArg_RegImm16label }, true)); // JumpRegisterLabel
             
             opcodeDictionary = new Dictionary<string, Opcode>();
             foreach (Opcode op in list)
             {
-                opcodeDictionary.Add(op.Command, op);
+                opcodeDictionary.Add(op.Command.ToString(), op);
             }
         }
 
