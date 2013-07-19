@@ -36,8 +36,8 @@ mem8[s] = r[d]
 mem16[s>>1] = r[d]
 #### jr s
 pc = r[s]
-#### wait
-wait for interrupt
+#### wait imm4
+wait for interrupt (imm4 specifies interrupt type)
 
 Encoding
 --------
@@ -53,24 +53,21 @@ j
 ### group 2 (s2)
 x   |  0  |  1  |  2  | 3 
 --- | --- | --- | --- | --- 
- 0  | mov | add | sub | and 
- 4  | or  | xor | shl | shr 
- 8  | not | neg | readm | writem
- C  |  ?  |  ?  |  ?  | ?
+ 0  | mov | add | sub | neg 
+ 4  | and | or  | xor | not  
+ 8  | shl | shr | saw | read_u8
+ C  | read_s8 | read_16 | write_8 | write_16
 
 ### group 3 (s3)
-jr
-
-### group 4 (s4)
-wait
+jr, wait
 
 ### Encoding table
 
-Group | bits                        |   START | END 
------ | ----                        |   ---  | ----
-s0 | 0\<1\> : imm15                      |   0000 | 7FFF
-s1 | 1\<1\> : s1\<3\>  : imm12               |   8000 | DFFF
-s2 | 1\<1\> : 6\<3\> : s2\<4\>   : imm8        |   E000 | EBFF
-s3 | 1\<1\> : 6\<3\> : 12\<4\> : 0\<4\> : imm4 |   EC00 | EC0F
-s4 | 1\<1\> : 6\<3\> : 12\<4\> : 1\<4\> : 0\<4\> |   EC10 | EC10
+Group | bits                           |  START | END 
+----- | ----                           |   ---  | ----
+s0 | 0\<1\> : imm15                    |   0000 | 7FFF
+s1 | 1\<1\> : s1\<3\> : imm12          |   8000 | DFFF
+s2 | 1\<1\> : 6\<3\>  : s2\<4\> : imm8 |   E000 | EFFF
+s3 | 1\<1\> : 7\<3\>  : 0\<8\>  : imm4 |   F000 | F00F
+s4 | 1\<1\> : 7\<3\>  : 1\<8\>  : imm4 |   F010 | F010
 
