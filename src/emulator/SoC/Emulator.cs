@@ -21,8 +21,7 @@ namespace SoC
     }
     public class RegisterChangedEventArgs : EventArgs
     {
-        public int Register { get; set; }
-        public int Value { get; set; }
+        public Register Register { get; set; }
     }
     public class ProgramCounterChangedEventArgs : EventArgs
     {
@@ -59,14 +58,16 @@ namespace SoC
         {
             ProgramCounter = 0;
             Program = program;
-            Register = new int[16];
-            Memory = new int[16384];
+            Register = new Register[16];
+            for (int i = 0; i < 16; i++)
+                Register[i] = new Register(i, 0);
+            Memory = new byte[16384];
         }
 
         // State
         int ProgramCounter;
-        int[] Register;
-        int[] Memory;
+        public Register[] Register;
+        public byte[] Memory;
 
         // Program
         Dictionary<int, Opcode> Program;
@@ -78,10 +79,7 @@ namespace SoC
             ProgramCounter = -1;
             SetProgramCounter(0);
             for (int i = 0; i < 16; i++)
-            {
-                Register[i] = 1;
                 SetRegister(i, 0);
-            }
         }
 
         public void Step()
@@ -98,11 +96,11 @@ namespace SoC
                 case Command.draw:
                     break;
                 case Command.movh:
-                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] & 0xFF) | ((op.Imm8 & 0xFF) << 8));
+                    SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue & 0xFF) | ((op.Imm8 & 0xFF) << 8)));
                     IncreaseProgramCounter();
                     break;
                 case Command.movl:
-                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] & 0xFF00) | (op.Imm8 & 0xFF));
+                    SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue & 0xFF00) | (op.Imm8 & 0xFF)));
                     IncreaseProgramCounter();
                     break;
                 case Command.beq:
@@ -112,57 +110,55 @@ namespace SoC
                         IncreaseProgramCounter();
                     break;
                 case Command.bgt:  // Signed compare
-                    int s1 = (Register[op.Register1.Number] > 32767) ? -((~(Register[op.Register1.Number] - 1)) & 0xffff) : Register[op.Register1.Number];
-                    int s2 = (Register[op.Register2.Number] > 32767) ? -((~(Register[op.Register2.Number] - 1)) & 0xffff) : Register[op.Register2.Number];
-                    if (s1 > s2)
+                    if (Register[op.Register1.Number].Value.SValue > Register[op.Register2.Number].Value.SValue)
                         SetProgramCounter(ProgramCounter + op.Imm4);
                     else
                         IncreaseProgramCounter();
                     break;
                 case Command.ba:  // Unsigned compare
-                    if (Register[op.Register1.Number] > Register[op.Register2.Number])
+                    if (Register[op.Register1.Number].Value.UValue > Register[op.Register2.Number].Value.UValue)
                         SetProgramCounter(ProgramCounter + op.Imm4);
                     else
                         IncreaseProgramCounter();
                     break;
                 case Command.mov:
-                    SetRegister(op.Register1.Number, Register[op.Register2.Number] & 0xFFFF);
+                    SetRegister(op.Register1.Number, (UInt16)(Register[op.Register2.Number].Value.UValue & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
                 case Command.add:
-                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] + Register[op.Register2.Number]) & 0xFFFF);
+                    SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue + Register[op.Register2.Number].Value.UValue) & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
                 case Command.sub:
-                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] - Register[op.Register2.Number]) & 0xFFFF);
+                    SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue - Register[op.Register2.Number].Value.UValue) & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
                 case Command.and:
-                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] & Register[op.Register2.Number]) & 0xFFFF);
+                    SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue & Register[op.Register2.Number].Value.UValue) & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
                 case Command.or:
-                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] | Register[op.Register2.Number]) & 0xFFFF);
+                    SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue | Register[op.Register2.Number].Value.UValue) & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
                 case Command.xor:
-                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] ^ Register[op.Register2.Number]) & 0xFFFF);
+                    SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue ^ Register[op.Register2.Number].Value.UValue) & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
                 case Command.shl:
-                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] << op.Imm4) & 0xFFFF);
+                    SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue << op.Imm4) & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
                 case Command.shr:
-                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] >> op.Imm4) & 0xFFFF);
+                    SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue >> op.Imm4) & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
                 case Command.not:
-                    SetRegister(op.Register1.Number, (Register[op.Register1.Number] ^ 0x8000) & 0xFFFF);
+                    SetRegister(op.Register1.Number, (UInt16)(~(Register[op.Register1.Number].Value.UValue)));
                     IncreaseProgramCounter();
                     break;
                 case Command.neg:
-                    SetRegister(op.Register1.Number, ((Register[op.Register1.Number] ^ 0xFFFF) + 1) & 0xFFFF);
+                    SetRegister(op.Register1.Number, (UInt16)((~(Register[op.Register1.Number].Value.UValue) + 1) & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
                 case Command.readm:
@@ -172,7 +168,7 @@ namespace SoC
                     IncreaseProgramCounter();
                     break;
                 case Command.jr:
-                    SetProgramCounter(Register[op.Register1.Number]);
+                    SetProgramCounter(Register[op.Register1.Number].Value.UValue);
                     break;
                 case Command.wait:
                     // wait for a half second
@@ -225,11 +221,19 @@ namespace SoC
         }
         #endregion
         //Register
-        #region private void SetRegister(int register, int value)
-        private void SetRegister(int register, int value)
+        #region private void SetRegister(int register, UInt16 value)
+        private void SetRegister(int register, UInt16 value)
         {
-            FireRegisterChanged(register, value);
-            Register[register] = value;
+            UInt16 oldValue = Register[register].Value.UValue;
+            Register[register].Value.UValue = value;
+            FireRegisterChanged(Register[register], oldValue);
+        }
+        #endregion
+        #region private void SetRegister(int register, Int16 value)
+        private void SetRegister(int register, Int16 value)
+        {
+            FireRegisterChanged(Register[register], value);
+            Register[register].Value.SValue = value;
         }
         #endregion
 
@@ -251,15 +255,14 @@ namespace SoC
             OnProgramCounterChanged(args);
         }
         #endregion
-        #region private void FireRegisterChanged(int OldProgramCounter, int NewProgramCounter)
-        private void FireRegisterChanged(int register, int value)
+        #region private void FireRegisterChanged(Register register, int oldvalue)
+        private void FireRegisterChanged(Register register, int oldvalue)
         {
-            if (Register[register] == value)
+            if (register.Value.SValue == oldvalue || register.Value.UValue == oldvalue)
                 return;
 
             RegisterChangedEventArgs args = new RegisterChangedEventArgs();
             args.Register = register;
-            args.Value = value;
             OnRegisterChanged(args);
         }
         #endregion

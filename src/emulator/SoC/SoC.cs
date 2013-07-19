@@ -200,7 +200,6 @@ namespace SoC
             // Assemble the program
             Program = a.Assemble(Source);
             DisplaySource(Source);
-            DisplayRegisters();
 
             tctMain.SelectedTab = tbpEmulator;
 
@@ -208,11 +207,15 @@ namespace SoC
             emulator.ProgramCounterChanged += new ProgramCounterChangedEventHandler(emulator_ProgramCounterChanged);
             emulator.RegisterChanged += new RegisterChangedEventHandler(emulator_RegisterChanged);
             emulator.Reset();
+
+            DisplayRegisters(emulator.Register);
+
         }
 
         void emulator_RegisterChanged(object o, RegisterChangedEventArgs e)
         {
-            lstRegister.Items[e.Register].SubItems[1].Text = "0x" + e.Value.ToString("X").PadLeft(4, '0');
+            e.Register.ListViewItem.SubItems[1].Text = e.Register.ValueString;
+            lstRegister.Refresh();
         }
 
         void emulator_ProgramCounterChanged(object o, ProgramCounterChangedEventArgs e)
@@ -242,11 +245,12 @@ namespace SoC
         }
         #endregion
         #region private void DisplayRegisters()
-        private void DisplayRegisters()
+        private void DisplayRegisters(Register[] list)
         {
             lstRegister.Items.Clear();
-            foreach (String reg in RegisterDictionary.registerDictionary.Keys)
-                lstRegister.Items.Add(RegisterDictionary.registerDictionary[reg].ListViewItem);
+
+            foreach (Register reg in list)
+                lstRegister.Items.Add(reg.ListViewItem);
         }
         #endregion
         #region private void DisplayBinary(Dictionary<int, Line> binary)

@@ -189,20 +189,21 @@
             this.colHRegName,
             this.colHRegValue});
             this.lstRegister.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lstRegister.Location = new System.Drawing.Point(591, 34);
+            this.lstRegister.Location = new System.Drawing.Point(513, 34);
             this.lstRegister.Name = "lstRegister";
-            this.lstRegister.Size = new System.Drawing.Size(129, 257);
+            this.lstRegister.Size = new System.Drawing.Size(207, 257);
             this.lstRegister.TabIndex = 4;
             this.lstRegister.UseCompatibleStateImageBehavior = false;
             this.lstRegister.View = System.Windows.Forms.View.Details;
             // 
             // colHRegName
             // 
-            this.colHRegName.Text = "Register";
+            this.colHRegName.Text = "Reg";
             // 
             // colHRegValue
             // 
             this.colHRegValue.Text = "Value";
+            this.colHRegValue.Width = 120;
             // 
             // grpActions
             // 

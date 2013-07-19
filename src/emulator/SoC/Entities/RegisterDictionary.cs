@@ -12,22 +12,22 @@ namespace SoC.Entities
         static RegisterDictionary()
         {
             List<Register> list = new List<Register>();
-            list.Add(new Register("r0", 0));
-            list.Add(new Register("r1", 1));
-            list.Add(new Register("r2", 2));
-            list.Add(new Register("r3", 3));
-            list.Add(new Register("r4", 4));
-            list.Add(new Register("r5", 5));
-            list.Add(new Register("r6", 6));
-            list.Add(new Register("r7", 7));
-            list.Add(new Register("r8", 8));
-            list.Add(new Register("r9", 9));
-            list.Add(new Register("r10", 10));
-            list.Add(new Register("r11", 11));
-            list.Add(new Register("r12", 12));
-            list.Add(new Register("r13", 13));
-            list.Add(new Register("r14", 14));
-            list.Add(new Register("r15", 15));
+            list.Add(new Register(0, 0));
+            list.Add(new Register(1, 0));
+            list.Add(new Register(2, 0));
+            list.Add(new Register(3, 0));
+            list.Add(new Register(4, 0));
+            list.Add(new Register(5, 0));
+            list.Add(new Register(6, 0));
+            list.Add(new Register(7, 0));
+            list.Add(new Register(8, 0));
+            list.Add(new Register(9, 0));
+            list.Add(new Register(10, 0));
+            list.Add(new Register(11, 0));
+            list.Add(new Register(12, 0));
+            list.Add(new Register(13, 0));
+            list.Add(new Register(14, 0));
+            list.Add(new Register(15, 0));
 
             registerDictionary = new Dictionary<string, Register>();
             foreach (Register r in list)
