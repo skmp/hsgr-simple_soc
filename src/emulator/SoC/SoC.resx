@@ -154,7 +154,7 @@ Label    ADD r0, r4
          xor r4, r3
          ba r4,r3, init
 
-afterxor writem r3, r0
+afterxor write_16 r3, r0
 
          jrl r15,Label
 </value>

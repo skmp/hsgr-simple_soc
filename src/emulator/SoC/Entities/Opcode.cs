@@ -135,14 +135,14 @@ namespace SoC.Entities
                     return Convert.ToUInt16(Value | (Register1.Number << 4) | (Imm4 << 0));
                 case OpcodeType.OneArg_Reg:
                     return Convert.ToUInt16(Value | (Register1.Number << 0));
+                case OpcodeType.OneArg_Imm4:
+                    return Convert.ToUInt16(Value | Imm4);
                 case OpcodeType.OneArg_Imm15:
                     return Convert.ToUInt16(Value | Imm15);
                 case OpcodeType.OneArg_Imm15label:
                     return Convert.ToUInt16(Value | 0); // Label is set as zero
                 case OpcodeType.OneArg_Imm16:
                     return 0xffff;
-                case OpcodeType.ZeroArg:
-                    return Convert.ToUInt16(Value);
                 default:
                     throw new NotImplementedException("OpcodeType not implemented [" + Type.ToString() + "]");
             }
@@ -169,14 +169,14 @@ namespace SoC.Entities
                     return lbl + " " + Command + " " + Register1.Name + ", 0x" + Imm4.ToString("X");
                 case OpcodeType.OneArg_Reg:
                     return lbl + " " + Command + " " + Register1.Name;
+                case OpcodeType.OneArg_Imm4:
+                    return lbl + " " + Command + " " + Imm4.ToString("X");
                 case OpcodeType.OneArg_Imm15:
                     return lbl + " " + Command + " " + Imm15.ToString("X");
                 case OpcodeType.OneArg_Imm15label:
                     return lbl + " " + Command + " " + Imm15label;
                 case OpcodeType.OneArg_Imm16:
                     return lbl + " " + Command + " " + Imm16.ToString("X");
-                case OpcodeType.ZeroArg:
-                    return lbl + " " + Command;
                 default:
                     throw new NotImplementedException("OpcodeType not implemented [" + Type.ToString() + "]");
             }
@@ -248,6 +248,9 @@ namespace SoC.Entities
                     case OpcodeType.OneArg_Reg:
                         argMatch = CheckArguments_OneArg_Reg(args);
                         break;
+                    case OpcodeType.OneArg_Imm4:
+                        argMatch = CheckArguments_OneArg_Imm4(args);
+                        break;
                     case OpcodeType.OneArg_Imm15:
                         argMatch = CheckArguments_OneArg_Imm15(args);
                         break;
@@ -256,9 +259,6 @@ namespace SoC.Entities
                         break;
                     case OpcodeType.OneArg_Imm16:
                         argMatch = CheckArguments_OneArg_Imm16(args);
-                        break;
-                    case OpcodeType.ZeroArg:
-                        argMatch = CheckArguments_ZeroArg(args);
                         break;
                     default:
                         throw new NotImplementedException("OpcodeType not implemented [" + t.ToString() + "]");
@@ -402,6 +402,19 @@ namespace SoC.Entities
             // check argument length
             if ((argMatch = CheckArgCount(argLength, 1)))
                 argMatch = CheckIsRegister(args[0], out _register1);
+
+            return argMatch;
+        }
+        #endregion
+        #region private bool CheckArguments_OneArg_Imm4(string[] args)
+        private bool CheckArguments_OneArg_Imm4(string[] args)
+        {
+            int argLength = args.Length;
+            bool argMatch = false;
+
+            // check argument length
+            if ((argMatch = CheckArgCount(argLength, 1)))
+                argMatch = CheckIsImm4(args[0], out _imm4);
 
             return argMatch;
         }

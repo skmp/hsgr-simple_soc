@@ -94,6 +94,7 @@ namespace SoC
                     SetProgramCounter(op.Imm15);
                     break;
                 case Command.draw:
+                    IncreaseProgramCounter();
                     break;
                 case Command.movh:
                     SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue & 0xFF) | ((op.Imm8 & 0xFF) << 8)));
@@ -133,6 +134,10 @@ namespace SoC
                     SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue - Register[op.Register2.Number].Value.UValue) & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
+                case Command.neg:
+                    SetRegister(op.Register1.Number, (UInt16)((~(Register[op.Register1.Number].Value.UValue) + 1) & 0xFFFF));
+                    IncreaseProgramCounter();
+                    break;
                 case Command.and:
                     SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue & Register[op.Register2.Number].Value.UValue) & 0xFFFF));
                     IncreaseProgramCounter();
@@ -145,6 +150,10 @@ namespace SoC
                     SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue ^ Register[op.Register2.Number].Value.UValue) & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
+                case Command.not:
+                    SetRegister(op.Register1.Number, (UInt16)(~(Register[op.Register1.Number].Value.UValue)));
+                    IncreaseProgramCounter();
+                    break;
                 case Command.shl:
                     SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue << op.Imm4) & 0xFFFF));
                     IncreaseProgramCounter();
@@ -153,18 +162,23 @@ namespace SoC
                     SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue >> op.Imm4) & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
-                case Command.not:
-                    SetRegister(op.Register1.Number, (UInt16)(~(Register[op.Register1.Number].Value.UValue)));
+                case Command.sar:
+                    SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue >> op.Imm4) & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
-                case Command.neg:
-                    SetRegister(op.Register1.Number, (UInt16)((~(Register[op.Register1.Number].Value.UValue) + 1) & 0xFFFF));
+                case Command.read_u8:
                     IncreaseProgramCounter();
                     break;
-                case Command.readm:
+                case Command.read_s8:
                     IncreaseProgramCounter();
                     break;
-                case Command.writem:
+                case Command.read_16:
+                    IncreaseProgramCounter();
+                    break;
+                case Command.write_8:
+                    IncreaseProgramCounter();
+                    break;
+                case Command.write_16:
                     IncreaseProgramCounter();
                     break;
                 case Command.jr:

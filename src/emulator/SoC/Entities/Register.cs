@@ -51,7 +51,7 @@ namespace SoC.Entities
         {
             get
             {
-                return Value.UValue.ToString() + " (" + Value.SValue.ToString() + ")";
+                return "0x" + Value.UValue.ToString("X").PadLeft(4,'0') + " (" + Value.SValue.ToString() + ")";
             }
         }
 
