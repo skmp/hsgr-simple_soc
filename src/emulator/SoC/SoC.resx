@@ -142,21 +142,21 @@ lbl      BA r7,r8, lbl2
 
 lbl2     LI r2,0xabcd
 
-init     ADD r0, r1
+         ADD r0, r1
          MOV r3, r0
 
          LI r4, 0x0001
 
 Label    ADD r0, r4
 
-         add r3, r2
+init     add r3, r2
          bgt r3, r2, afterxor
          xor r4, r3
          ba r4,r3, init
 
 afterxor write_16 r3, r0
 
-         jrl r15,Label
+         jrl r15,lbl
 </value>
   </data>
 </root>

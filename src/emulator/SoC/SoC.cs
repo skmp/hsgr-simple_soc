@@ -7,8 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using SoC.Entities;
+using SoC.BL.Entities;
 using System.Reflection;
+using SoC.BL;
+using SoC.BL.Events;
 
 namespace SoC
 {
@@ -190,16 +192,16 @@ namespace SoC
         // private helpers
         private void InitializeEmulator()
         {
-            Assembler a = new Assembler();
-
-            // Parse the program
-            StringReader sr = new StringReader(txtCode.Text);
-            Source = a.Parse(sr);
-            sr.Close();
-
             // Assemble the program
-            Program = a.Assemble(Source);
-            DisplaySource(Source);
+            AssemblerOutput asout = Assembler.Assemble(txtCode.Text);
+            Source = asout.Source;
+            Program = asout.Binary;
+
+
+            if (Source != null)
+                DisplaySource(Source);
+            else
+                DisplayBinary(Program);
 
             tctMain.SelectedTab = tbpEmulator;
 
@@ -209,7 +211,6 @@ namespace SoC
             emulator.Reset();
 
             DisplayRegisters(emulator.Register);
-
         }
 
         void emulator_RegisterChanged(object o, RegisterChangedEventArgs e)
@@ -222,15 +223,15 @@ namespace SoC
         {
             if (e.OldLine != null)
             {
-                e.OldLine.ListViewItem[e.OldProgramCounter - e.OldLine.Opcodes[0].Address].BackColor = Color.White;
-                e.OldLine.ListViewItem[e.OldProgramCounter - e.OldLine.Opcodes[0].Address].ForeColor = Color.Black;
+                e.OldLine.ListViewItem[(e.OldProgramCounter - e.OldLine.Opcodes[0].Address)/2].BackColor = Color.White;
+                e.OldLine.ListViewItem[(e.OldProgramCounter - e.OldLine.Opcodes[0].Address)/2].ForeColor = Color.Black;
             }
             if (e.NewLine != null)
             {
-                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].BackColor = Color.Green;
-                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].ForeColor = Color.White;
+                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address)/2].BackColor = Color.Green;
+                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address)/2].ForeColor = Color.White;
 
-                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].EnsureVisible();
+                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address)/2].EnsureVisible();
             }
 
             lblProgramCounter.Text = "0x" + e.NewProgramCounter.ToString("X").PadLeft(4, '0');

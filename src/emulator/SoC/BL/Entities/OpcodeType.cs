@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SoC.Entities
+namespace SoC.BL.Entities
 {
     public enum OpcodeType
     {

@@ -4,32 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
-using SoC.Entities;
+using SoC.BL.Entities;
 using System.Threading;
+using SoC.BL.Events;
 
-namespace SoC
+namespace SoC.BL
 {
     public delegate void DisplayMemoryChangedEventHandler(object o, DisplayMemoryChangedEventArgs e);
     public delegate void RegisterChangedEventHandler(object o, RegisterChangedEventArgs e);
     public delegate void ProgramCounterChangedEventHandler(object o, ProgramCounterChangedEventArgs e);
-
-    public class DisplayMemoryChangedEventArgs : EventArgs
-    {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public Color Color { get; set; }
-    }
-    public class RegisterChangedEventArgs : EventArgs
-    {
-        public Register Register { get; set; }
-    }
-    public class ProgramCounterChangedEventArgs : EventArgs
-    {
-        public int OldProgramCounter { get; set; }
-        public int NewProgramCounter { get; set; }
-        public Line OldLine { get; set; }
-        public Line NewLine { get; set; }
-    }
 
     public class Emulator
     {
@@ -53,6 +36,16 @@ namespace SoC
                 ProgramCounterChanged(this, e);
         }
 
+
+        public Emulator(byte[] memory)
+        {
+            ProgramCounter = 0;
+            Program = null;// program;
+            Register = new Register[16];
+            for (int i = 0; i < 16; i++)
+                Register[i] = new Register(i, 0);
+            Memory = new byte[16384];
+        }
 
         public Emulator(Dictionary<int, Opcode> program)
         {
@@ -220,7 +213,7 @@ namespace SoC
         #region private void IncreaseProgramCounter()
         private void IncreaseProgramCounter()
         {
-            int newPC = ProgramCounter + 1;
+            int newPC = ProgramCounter + 2;
             if (newPC > 65535)
                 newPC = 0;
 
