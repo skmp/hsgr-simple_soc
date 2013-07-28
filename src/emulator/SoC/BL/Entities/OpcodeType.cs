@@ -23,5 +23,8 @@ namespace SoC.BL.Entities
         TwoArg_RegImm16label_h,       // Pseudo instruction  (intermediate type for handling TwoArg_RegImm16label)
         TwoArg_RegImm16label_l,       // Pseudo instruction  (intermediate type for handling TwoArg_RegImm16label)
         OneArg_Imm16,                 // Pseudo instruction  [org 0x0100]
+
+        OneArg_Data8,                 // Pseudo instruction  [db 0xA3]
+        OneArg_Data16,                // Pseudo instruction  [dw 0xA3BC]
     }
 }

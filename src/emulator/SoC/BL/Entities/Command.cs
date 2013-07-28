@@ -36,5 +36,7 @@ namespace SoC.BL.Entities
         org,
         li,
         jrl,
+        db,
+        dw,
     }
 }

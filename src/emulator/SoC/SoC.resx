@@ -132,6 +132,10 @@
 
          LI r7, 0xffff
          LI r8, 0xf0
+
+	 LI r10,BArray
+	 LI r11,WArray
+
          BGT r7,r8 lbl
          mov r9,r8
 
@@ -157,6 +161,16 @@ init     add r3, r2
 afterxor write_16 r3, r0
 
          jrl r15,lbl
-</value>
+
+         org 0x4000
+BArray   db 0xA3
+         db 0xA4
+         db 0xA5
+
+WArray   dw 0x4321
+         dw 0x4321
+         dw 0x4321
+         dw 0x1234
+         dw 0x1234</value>
   </data>
 </root>

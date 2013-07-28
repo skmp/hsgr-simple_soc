@@ -76,6 +76,22 @@ namespace SoC.BL.Entities
             set { _imm16 = value; }
         }
         #endregion
+        #region public int Data8
+        private int _data8;
+        public int Data8
+        {
+            get { return _data8; }
+            set { _data8 = value; }
+        }
+        #endregion
+        #region public int Data16
+        private int _data16;
+        public int Data16
+        {
+            get { return _data16; }
+            set { _data16 = value; }
+        }
+        #endregion
         #region public string Imm4label
         private string _imm4label = null;
         public string Imm4label
@@ -143,8 +159,26 @@ namespace SoC.BL.Entities
                     return Convert.ToUInt16(Value | 0); // Label is set as zero
                 case OpcodeType.OneArg_Imm16:
                     return 0xffff;
+                case OpcodeType.OneArg_Data8:
+                    return Convert.ToUInt16(Data8);
+                case OpcodeType.OneArg_Data16:
+                    return Convert.ToUInt16(Data16);
                 default:
                     throw new NotImplementedException("OpcodeType not implemented [" + Type.ToString() + "]");
+            }
+        }
+        #endregion
+        #region public byte[] GetOpcodeMemoryValue()
+        public byte[] GetOpcodeMemoryValue()
+        {
+            // little endian memory
+            ushort v = GetOpcodeValue();
+            switch (Type)
+            {
+                case OpcodeType.OneArg_Data8:
+                    return new byte[1] { (byte)(v & 0xff) };
+                default:
+                    return new byte[2] { (byte)(v & 0xff), (byte)((v >> 8) & 0xff) };
             }
         }
         #endregion
@@ -170,13 +204,17 @@ namespace SoC.BL.Entities
                 case OpcodeType.OneArg_Reg:
                     return lbl + " " + Command + " " + Register1.Name;
                 case OpcodeType.OneArg_Imm4:
-                    return lbl + " " + Command + " " + Imm4.ToString("X");
+                    return lbl + " " + Command + " " + "0x" + Imm4.ToString("X");
                 case OpcodeType.OneArg_Imm15:
-                    return lbl + " " + Command + " " + Imm15.ToString("X");
+                    return lbl + " " + Command + " " + "0x" + Imm15.ToString("X").PadLeft(4, '0');
                 case OpcodeType.OneArg_Imm15label:
                     return lbl + " " + Command + " " + Imm15label;
                 case OpcodeType.OneArg_Imm16:
-                    return lbl + " " + Command + " " + Imm16.ToString("X");
+                    return lbl + " " + Command + " " + "0x" + Imm16.ToString("X").PadLeft(4, '0');
+                case OpcodeType.OneArg_Data8:
+                    return lbl + " " + Command + " " + "0x" + Data8.ToString("X").PadLeft(2, '0');
+                case OpcodeType.OneArg_Data16:
+                    return lbl + " " + Command + " " + "0x" + Data16.ToString("X").PadLeft(4, '0');
                 default:
                     throw new NotImplementedException("OpcodeType not implemented [" + Type.ToString() + "]");
             }
@@ -259,6 +297,12 @@ namespace SoC.BL.Entities
                         break;
                     case OpcodeType.OneArg_Imm16:
                         argMatch = CheckArguments_OneArg_Imm16(args);
+                        break;
+                    case OpcodeType.OneArg_Data8:
+                        argMatch = CheckArguments_OneArg_Data8(args);
+                        break;
+                    case OpcodeType.OneArg_Data16:
+                        argMatch = CheckArguments_OneArg_Data16(args);
                         break;
                     default:
                         throw new NotImplementedException("OpcodeType not implemented [" + t.ToString() + "]");
@@ -454,6 +498,32 @@ namespace SoC.BL.Entities
             // check argument length
             if ((argMatch = CheckArgCount(argLength, 1)))
                 argMatch = CheckIsImm16(args[0], out _imm16);
+
+            return argMatch;
+        }
+        #endregion
+        #region private bool CheckArguments_OneArg_Data8(string[] args)
+        private bool CheckArguments_OneArg_Data8(string[] args)
+        {
+            int argLength = args.Length;
+            bool argMatch = false;
+
+            // check argument length
+            if ((argMatch = CheckArgCount(argLength, 1)))
+                argMatch = CheckIsImm8(args[0], out _data8);
+
+            return argMatch;
+        }
+        #endregion
+        #region private bool CheckArguments_OneArg_Data16(string[] args)
+        private bool CheckArguments_OneArg_Data16(string[] args)
+        {
+            int argLength = args.Length;
+            bool argMatch = false;
+
+            // check argument length
+            if ((argMatch = CheckArgCount(argLength, 1)))
+                argMatch = CheckIsImm16(args[0], out _data16);
 
             return argMatch;
         }
