@@ -35,7 +35,8 @@ namespace SoC.BL
                 Array.Copy(m, 0, memory, address, m.Length);
             }
 
-            AssemblerOutput output = new AssemblerOutput(source, binary);
+            AssemblerOutput output = new AssemblerOutput(source, binary, memory);
+ 
             return output;
         }
         #endregion

@@ -44,7 +44,7 @@ namespace SoC.BL
             Register = new Register[16];
             for (int i = 0; i < 16; i++)
                 Register[i] = new Register(i, 0);
-            Memory = new byte[16384];
+            Memory = memory;
         }
 
         public Emulator(Dictionary<int, Opcode> program)
@@ -79,7 +79,10 @@ namespace SoC.BL
         {
             breakFlag = false;
 
-            Opcode op = Program[ProgramCounter];
+            UInt16 o = Convert.ToUInt16((Memory[ProgramCounter+1] <<8) | Memory[ProgramCounter]);
+            //Opcode op = Program[ProgramCounter];
+            Opcode op = OpcodeDictionary.Get(o);
+
             switch (op.Command)
             {
                 case Command.j:

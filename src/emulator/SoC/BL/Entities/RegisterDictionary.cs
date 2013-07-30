@@ -42,10 +42,23 @@ namespace SoC.BL.Entities
             return registerDictionary.ContainsKey(s.ToLower());
         }
 
+        public static bool Contains(int n)
+        {
+            return registerDictionary.ContainsKey("r" + n.ToString());
+        }
+
         public static Register Get(string s)
         {
             if (registerDictionary.ContainsKey(s.ToLower()))
                 return (Register)registerDictionary[s.ToLower()].Clone();
+
+            return null;
+        }
+
+        public static Register Get(int n)
+        {
+            if (registerDictionary.ContainsKey("r" + n.ToString()))
+                return (Register)registerDictionary["r" + n.ToString()].Clone();
 
             return null;
         }

@@ -10,6 +10,7 @@ namespace SoC.BL.Entities
         // the opcode definition parts
         public Command Command { get; private set; }
         public int Value { get; private set; }
+        public int Mask { get; private set; }
         public OpcodeType[] ApplicableTypes { get; private set; }
         public bool Pseudo { get; private set; }
 
@@ -119,11 +120,12 @@ namespace SoC.BL.Entities
 
 
         // constructor
-        #region public Opcode(string command, int value, OpcodeType[] applicableTypes, bool pseudo)
-        public Opcode(Command command, int value, OpcodeType[] applicableTypes, bool pseudo)
+        #region public Opcode(string command, int value, int mask, OpcodeType[] applicableTypes, bool pseudo)
+        public Opcode(Command command, int value, int mask, OpcodeType[] applicableTypes, bool pseudo)
         {
             Command = command;
             Value = value;
+            Mask = mask;
             ApplicableTypes = applicableTypes;
             Pseudo = pseudo;
         }
@@ -165,6 +167,112 @@ namespace SoC.BL.Entities
                     return Convert.ToUInt16(Data16);
                 default:
                     throw new NotImplementedException("OpcodeType not implemented [" + Type.ToString() + "]");
+            }
+        }
+        #endregion
+        #region public void SetOpcodeValue(UInt16 v)
+        public void SetOpcodeValue(UInt16 v)
+        {
+            int p, r1, r2, r3, i1;
+
+            // set default type
+            Type = ApplicableTypes[0];
+
+            // get values
+            switch (Type)
+            {
+                case OpcodeType.ThreeArg_RegRegReg:
+                    p = v & ~Mask;
+                    r1 = (p >> 8) & 0xF;
+                    r2 = (p >> 4) & 0xF;
+                    r3 = (p >> 0) & 0xF;
+
+                    if (RegisterDictionary.Contains(r1))
+                        Register1 = RegisterDictionary.Get(r1);
+                    if (RegisterDictionary.Contains(r2))
+                        Register2 = RegisterDictionary.Get(r2);
+                    if (RegisterDictionary.Contains(r3))
+                        Register3 = RegisterDictionary.Get(r3);
+                    break;
+                case OpcodeType.ThreeArg_RegRegImm4:
+                    p = v & ~Mask;
+                    r1 = (p >> 8) & 0xF;
+                    r2 = (p >> 4) & 0xF;
+                    i1 = (p >> 0) & 0xF;
+
+                    if (RegisterDictionary.Contains(r1))
+                        Register1 = RegisterDictionary.Get(r1);
+                    if (RegisterDictionary.Contains(r2))
+                        Register2 = RegisterDictionary.Get(r2);
+                    Imm4 = i1;
+                    break;
+                case OpcodeType.ThreeArg_RegRegImm4label:
+                    throw new Exception("This should never happen. [OpcodeType.ThreeArg_RegRegImm4label]");
+                case OpcodeType.TwoArg_RegReg:
+                    p = v & ~Mask;
+                    r1 = (p >> 4) & 0xF;
+                    r2 = (p >> 0) & 0xF;
+
+                    if (RegisterDictionary.Contains(r1))
+                        Register1 = RegisterDictionary.Get(r1);
+                    if (RegisterDictionary.Contains(r2))
+                        Register2 = RegisterDictionary.Get(r2);
+                    break;
+                case OpcodeType.TwoArg_RegImm8:
+                    p = v & ~Mask;
+                    r1 = (p >> 8) & 0xF;
+                    i1 = (p >> 0) & 0xFF;
+
+                    if (RegisterDictionary.Contains(r1))
+                        Register1 = RegisterDictionary.Get(r1);
+                    Imm8 = i1;
+                    break;
+                case OpcodeType.TwoArg_RegImm4:
+                    p = v & ~Mask;
+                    r1 = (p >> 4) & 0xF;
+                    i1 = (p >> 0) & 0xF;
+
+                    if (RegisterDictionary.Contains(r1))
+                        Register1 = RegisterDictionary.Get(r1);
+                    Imm4 = i1;
+                    break;
+                case OpcodeType.OneArg_Reg:
+                    p = v & ~Mask;
+                    r1 = (p >> 0) & 0xF;
+
+                    if (RegisterDictionary.Contains(r1))
+                        Register1 = RegisterDictionary.Get(r1);
+                    break;
+                case OpcodeType.OneArg_Imm4:
+                    p = v & ~Mask;
+                    i1 = (p >> 0) & 0xF;
+
+                    Imm4 = i1;
+                    break;
+                case OpcodeType.OneArg_Imm15:
+                    p = v & ~Mask;
+                    i1 = (p >> 0) & 0x7FFF;
+
+                    Imm15 = i1;
+                    break;
+                case OpcodeType.OneArg_Imm15label:
+                    throw new Exception("This should never happen. [OpcodeType.OneArg_Imm15label]");
+                case OpcodeType.TwoArg_RegImm16:
+                    throw new Exception("This should never happen. [OpcodeType.TwoArg_RegImm16]");
+                case OpcodeType.TwoArg_RegImm16label:
+                    throw new Exception("This should never happen. [OpcodeType.TwoArg_RegImm16label]");
+                case OpcodeType.TwoArg_RegImm16label_h:
+                    throw new Exception("This should never happen. [OpcodeType.TwoArg_RegImm16label_h]");
+                case OpcodeType.TwoArg_RegImm16label_l:
+                    throw new Exception("This should never happen. [OpcodeType.TwoArg_RegImm16label_l]");
+                case OpcodeType.OneArg_Imm16:
+                    throw new Exception("This should never happen. [OpcodeType.OneArg_Imm16]");
+                case OpcodeType.OneArg_Data8:
+                    throw new Exception("This should never happen. [OpcodeType.OneArg_Data8]");
+                case OpcodeType.OneArg_Data16:
+                    throw new Exception("This should never happen. [OpcodeType.OneArg_Data16]");
+                default:
+                    break;
             }
         }
         #endregion
@@ -241,14 +349,12 @@ namespace SoC.BL.Entities
         #region public object Clone()
         public object Clone()
         {
-            Opcode op = new Opcode(Command, Value, ApplicableTypes, Pseudo);
+            Opcode op = new Opcode(Command, Value, Mask, ApplicableTypes, Pseudo);
             //op.SetLabel(Label);
             //op.SetSourceLine(SourceLine);
             return op;
         }
         #endregion
-
-
         #region public void Parse(string[] args)
         public void Parse(string[] args)
         {

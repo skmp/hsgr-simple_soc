@@ -118,6 +118,7 @@ namespace SoC
 
         List<Line> Source = null;
         Dictionary<int, Opcode> Program = null;
+        byte[] Memory = null;
         Emulator emulator = null;
         EmulatorDisplay display = null;
 
@@ -196,7 +197,7 @@ namespace SoC
             AssemblerOutput asout = Assembler.Assemble(txtCode.Text);
             Source = asout.Source;
             Program = asout.Binary;
-
+            Memory = asout.Memory;
 
             if (Source != null)
                 DisplaySource(Source);
@@ -205,7 +206,7 @@ namespace SoC
 
             tctMain.SelectedTab = tbpEmulator;
 
-            emulator = new Emulator(Program);
+            emulator = new Emulator(Memory);
             emulator.ProgramCounterChanged += new ProgramCounterChangedEventHandler(emulator_ProgramCounterChanged);
             emulator.RegisterChanged += new RegisterChangedEventHandler(emulator_RegisterChanged);
             emulator.Reset();
