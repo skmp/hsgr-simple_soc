@@ -77,7 +77,7 @@ namespace SoC
             OpenFileDialog ofdLoad = new OpenFileDialog();
 
             //ofdLoad.InitialDirectory = "c:\\";
-            ofdLoad.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            ofdLoad.Filter = "asm files (*.asm)|*.asm|bin files (*.bin)|*.bin";
             ofdLoad.FilterIndex = 2;
             ofdLoad.RestoreDirectory = true;
 
@@ -85,20 +85,54 @@ namespace SoC
             {
                 try
                 {
-                    if ((fileStream = ofdLoad.OpenFile()) != null)
+                    if (ofdLoad.FileName.ToLower().EndsWith("asm"))
                     {
-                        using (fileStream)
+                        if ((fileStream = ofdLoad.OpenFile()) != null)
                         {
-                            using (StreamReader reader = new StreamReader(fileStream))
+                            using (fileStream)
                             {
-                                txtCode.Text = reader.ReadToEnd();
+                                using (StreamReader reader = new StreamReader(fileStream))
+                                {
+                                    txtCode.Text = reader.ReadToEnd();
+                                }
                             }
                         }
+                        else
+                            throw new Exception("Cannot open asm file. [" + ofdLoad.FileName + "]");
+                    }
+                    else if (ofdLoad.FileName.ToLower().EndsWith("bin"))
+                    {
+                        if ((fileStream = ofdLoad.OpenFile()) != null)
+                        {
+                            using (fileStream)
+                            {
+                                if (fileStream.Length != 32768)
+                                {
+                                    throw new Exception("File is not exactly 32768 bytes long");
+                                }
+                                using (BinaryReader reader = new BinaryReader(fileStream))
+                                {
+                                    int bytes = reader.Read(Memory, 0, 32768);
+                                    if (bytes != 32768)
+                                    {
+                                        throw new Exception("Could not read exactly 32768 bytes");
+                                    }
+
+                                    Source = null;
+                                }
+                            }
+                        }
+                        else
+                            throw new Exception("Cannot open asm file. [" + ofdLoad.FileName + "]");
+                    }
+                    else
+                    {
+                        throw new Exception("Unknown filetype. [" + ofdLoad.FileName + "]");
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
+                    MessageBox.Show("Could not read file from disk. Error: " + ex.Message);
                 }
             }
         }
@@ -206,7 +240,7 @@ namespace SoC
 
             tctMain.SelectedTab = tbpEmulator;
 
-            emulator = new Emulator(Memory);
+            emulator = new Emulator(Program);
             emulator.ProgramCounterChanged += new ProgramCounterChangedEventHandler(emulator_ProgramCounterChanged);
             emulator.RegisterChanged += new RegisterChangedEventHandler(emulator_RegisterChanged);
             emulator.Reset();

@@ -54,7 +54,15 @@ namespace SoC.BL
             Register = new Register[16];
             for (int i = 0; i < 16; i++)
                 Register[i] = new Register(i, 0);
-            Memory = new byte[16384];
+
+            Memory = new byte[32 * 1024]; // 32K memory
+            Array.Clear(Memory, 0, 32 * 1024);
+
+            foreach (int address in program.Keys)
+            {
+                byte[] m = program[address].GetOpcodeMemoryValue();
+                Array.Copy(m, 0, Memory, address, m.Length);
+            }
         }
 
         // State
