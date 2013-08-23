@@ -68,7 +68,7 @@ namespace SoC
         }
         #endregion
 
-        // Load a new source file
+        // Load - Assemble - Save
         #region private void btnLoad_Click(object sender, EventArgs e)
         private void btnLoad_Click(object sender, EventArgs e)
         {
@@ -83,6 +83,10 @@ namespace SoC
 
             if (ofdLoad.ShowDialog() == DialogResult.OK)
             {
+                Source = null;
+                Program = null;
+                Memory = null;
+
                 try
                 {
                     if (ofdLoad.FileName.ToLower().EndsWith("asm"))
@@ -117,8 +121,6 @@ namespace SoC
                                     {
                                         throw new Exception("Could not read exactly 32768 bytes");
                                     }
-
-                                    Source = null;
                                 }
                             }
                         }
@@ -137,14 +139,20 @@ namespace SoC
             }
         }
         #endregion
-        // Assemble the source file
         #region private void btnAssemble_Click(object sender, EventArgs e)
         private void btnAssemble_Click(object sender, EventArgs e)
         {
             InitializeEmulator();
         }
         #endregion
-        // Export the assembled source
+        #region private void btnSave_Click(object sender, EventArgs e)
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+
+        }
+        #endregion
+
+        // Export
         private void btnExport_Click(object sender, EventArgs e)
         {
             // export the compiled program in a format suitable to be used in the fpga
@@ -159,11 +167,18 @@ namespace SoC
         #region private void btnDebugReset_Click(object sender, EventArgs e)
         private void btnDebugReset_Click(object sender, EventArgs e)
         {
-            // reset the emulator state to the start options (probably has to be configurable)
-            tctMain.SelectedTab = tbpEmulator;
+            try
+            {
+                // reset the emulator state to the start options (probably has to be configurable)
+                tctMain.SelectedTab = tbpEmulator;
 
-            InitializeEmulator();
-            emulator.Reset();
+                InitializeEmulator();
+                emulator.Reset();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
         #endregion
         #region private void btnDebugStep_Click(object sender, EventArgs e)
@@ -215,7 +230,7 @@ namespace SoC
                 return;
 
             // show the display as a popup (always on top?)
-            if (display == null)
+            if (display == null || display.IsDisposed)
             {
                 display = new EmulatorDisplay(emulator);
             }
@@ -228,10 +243,13 @@ namespace SoC
         private void InitializeEmulator()
         {
             // Assemble the program
-            AssemblerOutput asout = Assembler.Assemble(txtCode.Text);
-            Source = asout.Source;
-            Program = asout.Binary;
-            Memory = asout.Memory;
+            if (Memory == null)
+            {
+                AssemblerOutput asout = Assembler.Assemble(txtCode.Text);
+                Source = asout.Source;
+                Program = asout.Binary;
+                Memory = asout.Memory;
+            }
 
             if (Source != null)
                 DisplaySource(Source);
@@ -258,15 +276,15 @@ namespace SoC
         {
             if (e.OldLine != null)
             {
-                e.OldLine.ListViewItem[(e.OldProgramCounter - e.OldLine.Opcodes[0].Address)/2].BackColor = Color.White;
-                e.OldLine.ListViewItem[(e.OldProgramCounter - e.OldLine.Opcodes[0].Address)/2].ForeColor = Color.Black;
+                e.OldLine.ListViewItem[(e.OldProgramCounter - e.OldLine.Opcodes[0].Address) / 2].BackColor = Color.White;
+                e.OldLine.ListViewItem[(e.OldProgramCounter - e.OldLine.Opcodes[0].Address) / 2].ForeColor = Color.Black;
             }
             if (e.NewLine != null)
             {
-                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address)/2].BackColor = Color.Green;
-                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address)/2].ForeColor = Color.White;
+                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address) / 2].BackColor = Color.Green;
+                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address) / 2].ForeColor = Color.White;
 
-                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address)/2].EnsureVisible();
+                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address) / 2].EnsureVisible();
             }
 
             lblProgramCounter.Text = "0x" + e.NewProgramCounter.ToString("X").PadLeft(4, '0');
@@ -316,5 +334,10 @@ namespace SoC
             }
         }
         #endregion
+
+        private void txtCode_TextChanged(object sender, EventArgs e)
+        {
+            Memory = null;
+        }
     }
 }

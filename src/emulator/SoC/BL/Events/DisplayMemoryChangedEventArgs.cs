@@ -10,6 +10,7 @@ namespace SoC.BL.Events
     {
         public int X { get; set; }
         public int Y { get; set; }
-        public Color Color { get; set; }
+        public int OldColor { get; set; }
+        public int NewColor { get; set; }
     }
 }

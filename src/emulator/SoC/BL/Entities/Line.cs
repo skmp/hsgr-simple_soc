@@ -31,9 +31,6 @@ namespace SoC.BL.Entities
         public string[] Parse()
         {
             string sourceLine = SourceLineOrig;
-    
-            // Trim the white space from start and end
-            sourceLine = sourceLine.Trim();
 
             // Trim the comments
             int p = sourceLine.IndexOf(';');
@@ -41,6 +38,9 @@ namespace SoC.BL.Entities
             {
                 sourceLine = sourceLine.Substring(0, p);
             }
+
+            // Trim the white space from start and end
+            sourceLine = sourceLine.Trim();
 
             // Convert all comma to space
             sourceLine = Regex.Replace(sourceLine, @"\,", " ");

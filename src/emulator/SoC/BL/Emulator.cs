@@ -39,24 +39,39 @@ namespace SoC.BL
 
         public Emulator(byte[] memory)
         {
-            ProgramCounter = 0;
-            Program = null;// program;
             Register = new Register[16];
             for (int i = 0; i < 16; i++)
-                Register[i] = new Register(i, 0);
+                Register[i] = new Register(i, 0xffff);
+
             Memory = memory;
+
+            Display = new byte[200, 200];
+            Array.Clear(Display, 0, 200 * 200);
+
+            UInt16 o;
+            Opcode op;
+            Program = new Dictionary<int, Opcode>();
+            for (int address = 0; address < 32768; address += 2)
+            {
+                o = Convert.ToUInt16((Memory[address + 1] << 8) | Memory[address]);
+                op = OpcodeDictionary.Get(o);
+                Program.Add(address, op);
+            }
         }
 
         public Emulator(Dictionary<int, Opcode> program)
         {
-            ProgramCounter = 0;
             Program = program;
             Register = new Register[16];
             for (int i = 0; i < 16; i++)
-                Register[i] = new Register(i, 0);
+                Register[i] = new Register(i, 0xffff);
 
             Memory = new byte[32 * 1024]; // 32K memory
             Array.Clear(Memory, 0, 32 * 1024);
+
+            Display = new byte[200, 200];
+            Array.Clear(Display, 0, 200 * 200);
+
 
             foreach (int address in program.Keys)
             {
@@ -69,6 +84,7 @@ namespace SoC.BL
         int ProgramCounter;
         public Register[] Register;
         public byte[] Memory;
+        public byte[,] Display;
 
         // Program
         Dictionary<int, Opcode> Program;
@@ -87,17 +103,17 @@ namespace SoC.BL
         {
             breakFlag = false;
 
-            UInt16 o = Convert.ToUInt16((Memory[ProgramCounter+1] <<8) | Memory[ProgramCounter]);
-            //Opcode op = Program[ProgramCounter];
-            Opcode op = OpcodeDictionary.Get(o);
+            // UInt16 o = Convert.ToUInt16((Memory[ProgramCounter+1] <<8) | Memory[ProgramCounter]);
+            // Opcode op = OpcodeDictionary.Get(o);
+            Opcode op = Program[ProgramCounter];
 
             switch (op.Command)
             {
                 case Command.j:
-                    FireProgramCounterChanged(ProgramCounter, op.Imm15);
                     SetProgramCounter(op.Imm15);
                     break;
                 case Command.draw:
+                    SetDisplayPixel(Register[op.Register1.Number], Register[op.Register2.Number], Register[op.Register3.Number]);
                     IncreaseProgramCounter();
                     break;
                 case Command.movh:
@@ -254,8 +270,40 @@ namespace SoC.BL
             Register[register].Value.SValue = value;
         }
         #endregion
+        // Display
+        private void SetDisplayPixel(Register reg1, Register reg2, Register reg3)
+        {
+            // Set the new Pixel value
+            int oldColor = Display[reg1.Value.UValue, reg2.Value.UValue];
+            Display[reg1.Value.UValue, reg2.Value.UValue] = (byte)reg3.Value.UValue;
+            FireDisplayMemoryChanged(reg1.Value.UValue, reg2.Value.UValue, oldColor, reg3.Value.UValue);
+
+            // Return the previous Pixel value
+            UInt16 oldValue = reg3.Value.UValue;
+            reg3.Value.UValue = (ushort)oldColor;
+            FireRegisterChanged(reg3, oldValue);
+        }
+        // Memory
+        private void SetMemoryValue()
+        {
+        }
 
         // Events
+        #region private void FireDisplayMemoryChanged(int X, int Y, int OldColor, int NewColor)
+        private void FireDisplayMemoryChanged(int X, int Y, int OldColor, int NewColor)
+        {
+            if (OldColor == NewColor)
+                return;
+
+            DisplayMemoryChangedEventArgs args = new DisplayMemoryChangedEventArgs();
+            args.X = X;
+            args.Y = Y;
+            args.OldColor = OldColor;
+            args.NewColor = NewColor;
+
+            OnDisplayMemoryChanged(args);
+        }
+        #endregion 
         #region private void FireProgramCounterChanged(int OldProgramCounter, int NewProgramCounter)
         private void FireProgramCounterChanged(int OldProgramCounter, int NewProgramCounter)
         {

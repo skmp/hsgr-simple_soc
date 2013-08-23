@@ -8,15 +8,20 @@ using System.Text;
 using System.Windows.Forms;
 using SoC.BL;
 using SoC.BL.Events;
+using System.Drawing.Imaging;
 
 namespace SoC
 {
     public partial class EmulatorDisplay : Form
     {
+        private const int ZoomFactor = 1;
         // Reference to the emulator
         private Emulator emulator;
         // The display
-        private Bitmap display;
+        private Bitmap bitmap;
+
+        Color[] palette = { Color.Black, Color.Blue, Color.Green, Color.Cyan, Color.Red, Color.Purple, Color.Yellow, Color.White };
+
 
         public EmulatorDisplay(Emulator emulator)
         {
@@ -29,7 +34,8 @@ namespace SoC
         #region private void EmulatorDisplay_Paint(object sender, PaintEventArgs e)
         private void EmulatorDisplay_Paint(object sender, PaintEventArgs e)
         {
-            e.Graphics.DrawImage(display, 0, 0, ClientSize.Width, ClientSize.Height);
+            Rectangle r = new Rectangle(e.ClipRectangle.X / ZoomFactor, e.ClipRectangle.Y / ZoomFactor, e.ClipRectangle.Width / ZoomFactor, e.ClipRectangle.Height / ZoomFactor);
+            e.Graphics.DrawImage(bitmap, e.ClipRectangle, r, GraphicsUnit.Pixel);
         }
         #endregion
         #region private void EmulatorDisplay_Resize(object sender, EventArgs e)
@@ -41,23 +47,25 @@ namespace SoC
         #region private void EmulatorDisplay_Load(object sender, EventArgs e)
         private void EmulatorDisplay_Load(object sender, EventArgs e)
         {
-            // TODO: Get the display size from settings??
-            display = new Bitmap(200, 200);
+            bitmap = new Bitmap(emulator.Display.GetLength(0), emulator.Display.GetLength(1), PixelFormat.Format32bppPArgb);
 
             // Set each pixel in myBitmap to black. 
             // Set the border to red.
-            for (int Xcount = 0; Xcount < display.Width; Xcount++)
+            for (int Xcount = 0; Xcount < bitmap.Width; Xcount++)
             {
-                for (int Ycount = 0; Ycount < display.Height; Ycount++)
+                for (int Ycount = 0; Ycount < bitmap.Height; Ycount++)
                 {
-                    if (Xcount == 0 || Ycount == 0 || Xcount == display.Width - 1 || Ycount == display.Height - 1)
-                        display.SetPixel(Xcount, Ycount, Color.Red);
-                    else
-                        display.SetPixel(Xcount, Ycount, Color.Black);
+                    byte c = emulator.Display[Xcount/ZoomFactor, Ycount/ZoomFactor];
+                    // out of range colors set to black
+                    if (c > 7)
+                        c = 0;
+
+                    bitmap.SetPixel(Xcount, Ycount, palette[c]);
                 }
             }
 
-            ClientSize = new Size(3 * display.Width, 3 * display.Height);
+            ClientSize = new Size(bitmap.Width * ZoomFactor, bitmap.Height * ZoomFactor);
+            Refresh();
 
             emulator.DisplayMemoryChanged += new DisplayMemoryChangedEventHandler(ShowOnScreen);
         }
@@ -71,8 +79,13 @@ namespace SoC
 
         public void ShowOnScreen(object o, DisplayMemoryChangedEventArgs e)
         {
-            display.SetPixel(e.X, e.Y, e.Color);
-            Refresh();
+            int c = e.NewColor;
+            // out of range colors set to black
+            if (c > 7)
+                c = 0;
+
+            bitmap.SetPixel(e.X, e.Y, palette[c]);
+            Invalidate(new Rectangle(e.X * ZoomFactor, e.Y * ZoomFactor, 1 * ZoomFactor, 1 * ZoomFactor));
         }
     }
 }

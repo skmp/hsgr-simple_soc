@@ -47,6 +47,7 @@
             this.colHRegName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colHRegValue = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.grpActions = new System.Windows.Forms.GroupBox();
+            this.btnSave = new System.Windows.Forms.Button();
             this.btnExport = new System.Windows.Forms.Button();
             this.grpDebug = new System.Windows.Forms.GroupBox();
             this.btnDebugBreak = new System.Windows.Forms.Button();
@@ -72,6 +73,7 @@
             this.txtCode.Size = new System.Drawing.Size(384, 484);
             this.txtCode.TabIndex = 0;
             this.txtCode.Text = resources.GetString("txtCode.Text");
+            this.txtCode.TextChanged += new System.EventHandler(this.txtCode_TextChanged);
             // 
             // btnAssemble
             // 
@@ -207,6 +209,7 @@
             // 
             // grpActions
             // 
+            this.grpActions.Controls.Add(this.btnSave);
             this.grpActions.Controls.Add(this.btnExport);
             this.grpActions.Controls.Add(this.grpDebug);
             this.grpActions.Controls.Add(this.btnLoad);
@@ -218,9 +221,19 @@
             this.grpActions.TabStop = false;
             this.grpActions.Text = "Actions";
             // 
+            // btnSave
+            // 
+            this.btnSave.Location = new System.Drawing.Point(26, 86);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(75, 23);
+            this.btnSave.TabIndex = 5;
+            this.btnSave.Text = "Save";
+            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            // 
             // btnExport
             // 
-            this.btnExport.Location = new System.Drawing.Point(27, 86);
+            this.btnExport.Location = new System.Drawing.Point(27, 115);
             this.btnExport.Name = "btnExport";
             this.btnExport.Size = new System.Drawing.Size(75, 23);
             this.btnExport.TabIndex = 4;
@@ -235,7 +248,7 @@
             this.grpDebug.Controls.Add(this.btnDebugDisplay);
             this.grpDebug.Controls.Add(this.btnDebugStep);
             this.grpDebug.Controls.Add(this.btnDebugReset);
-            this.grpDebug.Location = new System.Drawing.Point(7, 137);
+            this.grpDebug.Location = new System.Drawing.Point(7, 175);
             this.grpDebug.Name = "grpDebug";
             this.grpDebug.Size = new System.Drawing.Size(112, 234);
             this.grpDebug.TabIndex = 3;
@@ -352,6 +365,7 @@
         private System.Windows.Forms.Button btnDebugBreak;
         private System.Windows.Forms.Button btnDebugRun;
         private System.Windows.Forms.Label lblProgramCounter;
+        private System.Windows.Forms.Button btnSave;
     }
 }
 
