@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using SoC.BL;
 using SoC.BL.Events;
@@ -14,48 +9,28 @@ namespace SoC
 {
     public partial class EmulatorDisplay : Form
     {
-        private const int ZoomFactor = 1;
-        // Reference to the emulator
+        private double ZoomFactor = 3;
         private Emulator emulator;
-        // The display
         private Bitmap bitmap;
-
         Color[] palette = { Color.Black, Color.Blue, Color.Green, Color.Cyan, Color.Red, Color.Purple, Color.Yellow, Color.White };
-
 
         public EmulatorDisplay(Emulator emulator)
         {
             InitializeComponent();
-
             this.emulator = emulator;
         }
 
         // Event handlers
-        #region private void EmulatorDisplay_Paint(object sender, PaintEventArgs e)
-        private void EmulatorDisplay_Paint(object sender, PaintEventArgs e)
-        {
-            Rectangle r = new Rectangle(e.ClipRectangle.X / ZoomFactor, e.ClipRectangle.Y / ZoomFactor, e.ClipRectangle.Width / ZoomFactor, e.ClipRectangle.Height / ZoomFactor);
-            e.Graphics.DrawImage(bitmap, e.ClipRectangle, r, GraphicsUnit.Pixel);
-        }
-        #endregion
-        #region private void EmulatorDisplay_Resize(object sender, EventArgs e)
-        private void EmulatorDisplay_Resize(object sender, EventArgs e)
-        {
-            Refresh();
-        }
-        #endregion
         #region private void EmulatorDisplay_Load(object sender, EventArgs e)
         private void EmulatorDisplay_Load(object sender, EventArgs e)
         {
             bitmap = new Bitmap(emulator.Display.GetLength(0), emulator.Display.GetLength(1), PixelFormat.Format32bppPArgb);
 
-            // Set each pixel in myBitmap to black. 
-            // Set the border to red.
             for (int Xcount = 0; Xcount < bitmap.Width; Xcount++)
             {
                 for (int Ycount = 0; Ycount < bitmap.Height; Ycount++)
                 {
-                    byte c = emulator.Display[Xcount/ZoomFactor, Ycount/ZoomFactor];
+                    byte c = emulator.Display[Xcount, Ycount];
                     // out of range colors set to black
                     if (c > 7)
                         c = 0;
@@ -64,10 +39,29 @@ namespace SoC
                 }
             }
 
-            ClientSize = new Size(bitmap.Width * ZoomFactor, bitmap.Height * ZoomFactor);
-            Refresh();
+            ClientSize = new Size(Convert.ToInt32(bitmap.Width * ZoomFactor), Convert.ToInt32(bitmap.Height * ZoomFactor));
 
             emulator.DisplayMemoryChanged += new DisplayMemoryChangedEventHandler(ShowOnScreen);
+
+            pboxDisplay.Image = bitmap;
+        }
+        #endregion
+        #region private void EmulatorDisplay_Resize(object sender, EventArgs e)
+        private void EmulatorDisplay_Resize(object sender, EventArgs e)
+        {
+            if (ClientSize.Width > ClientSize.Height)
+            {
+                ZoomFactor = ClientSize.Height * 1.0 / bitmap.Height * 1.0;
+            }
+            else
+            {
+                ZoomFactor = ClientSize.Width * 1.0 / bitmap.Width * 1.0;
+            }
+
+            pboxDisplay.Left = 0;
+            pboxDisplay.Top = 0;
+            pboxDisplay.Width = Convert.ToInt32(bitmap.Width * ZoomFactor);
+            pboxDisplay.Height = Convert.ToInt32(bitmap.Height * ZoomFactor);
         }
         #endregion
         #region private void EmulatorDisplay_FormClosing(object sender, FormClosingEventArgs e)
@@ -80,12 +74,11 @@ namespace SoC
         public void ShowOnScreen(object o, DisplayMemoryChangedEventArgs e)
         {
             int c = e.NewColor;
-            // out of range colors set to black
-            if (c > 7)
-                c = 0;
+            if (c < 0 || c > 7)  // sanity check
+                return;
 
             bitmap.SetPixel(e.X, e.Y, palette[c]);
-            Invalidate(new Rectangle(e.X * ZoomFactor, e.Y * ZoomFactor, 1 * ZoomFactor, 1 * ZoomFactor));
+            pboxDisplay.Invalidate(new Rectangle((int)(e.X * ZoomFactor - ZoomFactor), (int)(e.Y * ZoomFactor - ZoomFactor), (int)(2 * ZoomFactor), (int)(2 * ZoomFactor)));
         }
     }
 }

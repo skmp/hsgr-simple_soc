@@ -22,10 +22,10 @@ namespace SoC
         }
 
         // Event handlers
-        #region private void frmCPU_Load(object sender, EventArgs e)
-        private void frmCPU_Load(object sender, EventArgs e)
+        #region private void SoC_Load(object sender, EventArgs e)
+        private void SoC_Load(object sender, EventArgs e)
         {
-            frmCPU_Resize(sender, e);
+            SoC_Resize(sender, e);
 
             var doubleBufferPropertyInfo = lstBinary.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
             doubleBufferPropertyInfo.SetValue(lstBinary, true, null);
@@ -33,8 +33,8 @@ namespace SoC
             doubleBufferPropertyInfo.SetValue(lstMemory, true, null);
         }
         #endregion
-        #region private void frmCPU_Resize(object sender, EventArgs e)
-        private void frmCPU_Resize(object sender, EventArgs e)
+        #region private void SoC_Resize(object sender, EventArgs e)
+        private void SoC_Resize(object sender, EventArgs e)
         {
             int dx = 12, dy = 12;
 
@@ -53,18 +53,34 @@ namespace SoC
 
             lstBinary.Location = new Point(dx, 2 * dy + lblProgramCounter.Height);
             lstBinary.Size = new Size(tbpEmulator.Size.Width - lstRegister.Size.Width - lstMemory.Size.Width - 4 * dx, tbpEmulator.Size.Height - 3 * dy - lblProgramCounter.Height);
+            chkBinaryDisplay.Location = new Point(lstBinary.Location.X + lstBinary.Size.Width - chkBinaryDisplay.Width, dy);
 
-            lstRegister.Location = new Point(dx + lstBinary.Size.Width + dx, dy);
-            lstRegister.Size = new Size(lstRegister.Size.Width, tbpEmulator.Size.Height - 2 * dy);
+            lstRegister.Location = new Point(dx + lstBinary.Size.Width + dx, lstBinary.Location.Y);
+            lstRegister.Size = new Size(lstRegister.Size.Width, lstBinary.Size.Height);
+            chkRegisterDisplay.Location = new Point(lstRegister.Location.X + lstRegister.Size.Width - chkRegisterDisplay.Width, dy);
 
-            lstMemory.Location = new Point(dx + lstBinary.Size.Width + dx + lstRegister.Size.Width + dx, dy);
-            lstMemory.Size = new Size(lstMemory.Size.Width, tbpEmulator.Size.Height - 2 * dy);
+            lstMemory.Location = new Point(dx + lstBinary.Size.Width + dx + lstRegister.Size.Width + dx, lstBinary.Location.Y);
+            lstMemory.Size = new Size(lstMemory.Size.Width, lstBinary.Size.Height);
+            chkMemoryDisplay.Location = new Point(lstMemory.Location.X + lstMemory.Size.Width - chkMemoryDisplay.Width, dy);
+        }
+        #endregion
+        #region private void SoC_FormClosing(object sender, FormClosingEventArgs e)
+        private void SoC_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (emulator != null)
+                emulator.Break();
         }
         #endregion
         #region private void tctMain_SelectedIndexChanged(object sender, EventArgs e)
         private void tctMain_SelectedIndexChanged(object sender, EventArgs e)
         {
-            frmCPU_Resize(sender, e);
+            SoC_Resize(sender, e);
+        }
+        #endregion
+        #region private void txtCode_TextChanged(object sender, EventArgs e)
+        private void txtCode_TextChanged(object sender, EventArgs e)
+        {
+            Memory = null;
         }
         #endregion
 
@@ -186,6 +202,9 @@ namespace SoC
         {
             try
             {
+                if (emulator == null)
+                    return;
+
                 tctMain.SelectedTab = tbpEmulator;
                 emulator.Step();
             }
@@ -200,6 +219,9 @@ namespace SoC
         {
             try
             {
+                if (emulator == null)
+                    return;
+
                 tctMain.SelectedTab = tbpEmulator;
                 emulator.Run();
             }
@@ -214,6 +236,9 @@ namespace SoC
         {
             try
             {
+                if (emulator == null)
+                    return;
+
                 tctMain.SelectedTab = tbpEmulator;
                 emulator.Break();
             }
@@ -268,12 +293,17 @@ namespace SoC
 
         void emulator_RegisterChanged(object o, RegisterChangedEventArgs e)
         {
+            if (!chkRegisterDisplay.Checked)
+                return;
+
             e.Register.ListViewItem.SubItems[1].Text = e.Register.ValueString;
             lstRegister.Refresh();
         }
-
         void emulator_ProgramCounterChanged(object o, ProgramCounterChangedEventArgs e)
         {
+            if (!chkBinaryDisplay.Checked)
+                return;
+
             if (e.OldLine != null)
             {
                 e.OldLine.ListViewItem[(e.OldProgramCounter - e.OldLine.Opcodes[0].Address) / 2].BackColor = Color.White;
@@ -334,10 +364,5 @@ namespace SoC
             }
         }
         #endregion
-
-        private void txtCode_TextChanged(object sender, EventArgs e)
-        {
-            Memory = null;
-        }
     }
 }

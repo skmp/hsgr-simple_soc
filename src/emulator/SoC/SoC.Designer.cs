@@ -56,6 +56,9 @@
             this.btnDebugStep = new System.Windows.Forms.Button();
             this.btnDebugReset = new System.Windows.Forms.Button();
             this.btnLoad = new System.Windows.Forms.Button();
+            this.chkBinaryDisplay = new System.Windows.Forms.CheckBox();
+            this.chkRegisterDisplay = new System.Windows.Forms.CheckBox();
+            this.chkMemoryDisplay = new System.Windows.Forms.CheckBox();
             this.tctMain.SuspendLayout();
             this.tbpSource.SuspendLayout();
             this.tbpEmulator.SuspendLayout();
@@ -143,6 +146,9 @@
             // 
             // tbpEmulator
             // 
+            this.tbpEmulator.Controls.Add(this.chkMemoryDisplay);
+            this.tbpEmulator.Controls.Add(this.chkRegisterDisplay);
+            this.tbpEmulator.Controls.Add(this.chkBinaryDisplay);
             this.tbpEmulator.Controls.Add(this.lblProgramCounter);
             this.tbpEmulator.Controls.Add(this.lstMemory);
             this.tbpEmulator.Controls.Add(this.lstRegister);
@@ -315,6 +321,42 @@
             this.btnLoad.UseVisualStyleBackColor = true;
             this.btnLoad.Click += new System.EventHandler(this.btnLoad_Click);
             // 
+            // chkBinaryDisplay
+            // 
+            this.chkBinaryDisplay.AutoSize = true;
+            this.chkBinaryDisplay.Checked = true;
+            this.chkBinaryDisplay.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkBinaryDisplay.Location = new System.Drawing.Point(360, 10);
+            this.chkBinaryDisplay.Name = "chkBinaryDisplay";
+            this.chkBinaryDisplay.Size = new System.Drawing.Size(60, 17);
+            this.chkBinaryDisplay.TabIndex = 7;
+            this.chkBinaryDisplay.Text = "Display";
+            this.chkBinaryDisplay.UseVisualStyleBackColor = true;
+            // 
+            // chkRegisterDisplay
+            // 
+            this.chkRegisterDisplay.AutoSize = true;
+            this.chkRegisterDisplay.Checked = true;
+            this.chkRegisterDisplay.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkRegisterDisplay.Location = new System.Drawing.Point(513, 9);
+            this.chkRegisterDisplay.Name = "chkRegisterDisplay";
+            this.chkRegisterDisplay.Size = new System.Drawing.Size(60, 17);
+            this.chkRegisterDisplay.TabIndex = 8;
+            this.chkRegisterDisplay.Text = "Display";
+            this.chkRegisterDisplay.UseVisualStyleBackColor = true;
+            // 
+            // chkMemoryDisplay
+            // 
+            this.chkMemoryDisplay.AutoSize = true;
+            this.chkMemoryDisplay.Checked = true;
+            this.chkMemoryDisplay.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkMemoryDisplay.Location = new System.Drawing.Point(660, 9);
+            this.chkMemoryDisplay.Name = "chkMemoryDisplay";
+            this.chkMemoryDisplay.Size = new System.Drawing.Size(60, 17);
+            this.chkMemoryDisplay.TabIndex = 9;
+            this.chkMemoryDisplay.Text = "Display";
+            this.chkMemoryDisplay.UseVisualStyleBackColor = true;
+            // 
             // SoC
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -324,8 +366,9 @@
             this.Controls.Add(this.tctMain);
             this.Name = "SoC";
             this.Text = "SoC";
-            this.Load += new System.EventHandler(this.frmCPU_Load);
-            this.Resize += new System.EventHandler(this.frmCPU_Resize);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SoC_FormClosing);
+            this.Load += new System.EventHandler(this.SoC_Load);
+            this.Resize += new System.EventHandler(this.SoC_Resize);
             this.tctMain.ResumeLayout(false);
             this.tbpSource.ResumeLayout(false);
             this.tbpSource.PerformLayout();
@@ -366,6 +409,9 @@
         private System.Windows.Forms.Button btnDebugRun;
         private System.Windows.Forms.Label lblProgramCounter;
         private System.Windows.Forms.Button btnSave;
+        private System.Windows.Forms.CheckBox chkBinaryDisplay;
+        private System.Windows.Forms.CheckBox chkMemoryDisplay;
+        private System.Windows.Forms.CheckBox chkRegisterDisplay;
     }
 }
 
