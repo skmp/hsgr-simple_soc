@@ -94,7 +94,7 @@ namespace SoC
 
             //ofdLoad.InitialDirectory = "c:\\";
             ofdLoad.Filter = "asm files (*.asm)|*.asm|bin files (*.bin)|*.bin";
-            ofdLoad.FilterIndex = 2;
+            ofdLoad.FilterIndex = 1;
             ofdLoad.RestoreDirectory = true;
 
             if (ofdLoad.ShowDialog() == DialogResult.OK)
@@ -364,5 +364,11 @@ namespace SoC
             }
         }
         #endregion
+
+        private void btnSpriteCalculator_Click(object sender, EventArgs e)
+        {
+            SpriteCalculator w = new SpriteCalculator();
+            w.Show();
+        }
     }
 }

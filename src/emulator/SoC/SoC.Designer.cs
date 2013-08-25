@@ -39,6 +39,9 @@
             this.tctMain = new System.Windows.Forms.TabControl();
             this.tbpSource = new System.Windows.Forms.TabPage();
             this.tbpEmulator = new System.Windows.Forms.TabPage();
+            this.chkMemoryDisplay = new System.Windows.Forms.CheckBox();
+            this.chkRegisterDisplay = new System.Windows.Forms.CheckBox();
+            this.chkBinaryDisplay = new System.Windows.Forms.CheckBox();
             this.lblProgramCounter = new System.Windows.Forms.Label();
             this.lstMemory = new System.Windows.Forms.ListView();
             this.colHMemoryName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -47,6 +50,8 @@
             this.colHRegName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colHRegValue = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.grpActions = new System.Windows.Forms.GroupBox();
+            this.grpUtils = new System.Windows.Forms.GroupBox();
+            this.btnSpriteCalculator = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnExport = new System.Windows.Forms.Button();
             this.grpDebug = new System.Windows.Forms.GroupBox();
@@ -56,13 +61,11 @@
             this.btnDebugStep = new System.Windows.Forms.Button();
             this.btnDebugReset = new System.Windows.Forms.Button();
             this.btnLoad = new System.Windows.Forms.Button();
-            this.chkBinaryDisplay = new System.Windows.Forms.CheckBox();
-            this.chkRegisterDisplay = new System.Windows.Forms.CheckBox();
-            this.chkMemoryDisplay = new System.Windows.Forms.CheckBox();
             this.tctMain.SuspendLayout();
             this.tbpSource.SuspendLayout();
             this.tbpEmulator.SuspendLayout();
             this.grpActions.SuspendLayout();
+            this.grpUtils.SuspendLayout();
             this.grpDebug.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -80,7 +83,7 @@
             // 
             // btnAssemble
             // 
-            this.btnAssemble.Location = new System.Drawing.Point(27, 57);
+            this.btnAssemble.Location = new System.Drawing.Point(25, 57);
             this.btnAssemble.Name = "btnAssemble";
             this.btnAssemble.Size = new System.Drawing.Size(75, 23);
             this.btnAssemble.TabIndex = 1;
@@ -161,6 +164,42 @@
             this.tbpEmulator.Text = "Emulator";
             this.tbpEmulator.UseVisualStyleBackColor = true;
             // 
+            // chkMemoryDisplay
+            // 
+            this.chkMemoryDisplay.AutoSize = true;
+            this.chkMemoryDisplay.Checked = true;
+            this.chkMemoryDisplay.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkMemoryDisplay.Location = new System.Drawing.Point(660, 9);
+            this.chkMemoryDisplay.Name = "chkMemoryDisplay";
+            this.chkMemoryDisplay.Size = new System.Drawing.Size(60, 17);
+            this.chkMemoryDisplay.TabIndex = 9;
+            this.chkMemoryDisplay.Text = "Display";
+            this.chkMemoryDisplay.UseVisualStyleBackColor = true;
+            // 
+            // chkRegisterDisplay
+            // 
+            this.chkRegisterDisplay.AutoSize = true;
+            this.chkRegisterDisplay.Checked = true;
+            this.chkRegisterDisplay.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkRegisterDisplay.Location = new System.Drawing.Point(513, 9);
+            this.chkRegisterDisplay.Name = "chkRegisterDisplay";
+            this.chkRegisterDisplay.Size = new System.Drawing.Size(60, 17);
+            this.chkRegisterDisplay.TabIndex = 8;
+            this.chkRegisterDisplay.Text = "Display";
+            this.chkRegisterDisplay.UseVisualStyleBackColor = true;
+            // 
+            // chkBinaryDisplay
+            // 
+            this.chkBinaryDisplay.AutoSize = true;
+            this.chkBinaryDisplay.Checked = true;
+            this.chkBinaryDisplay.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkBinaryDisplay.Location = new System.Drawing.Point(360, 10);
+            this.chkBinaryDisplay.Name = "chkBinaryDisplay";
+            this.chkBinaryDisplay.Size = new System.Drawing.Size(60, 17);
+            this.chkBinaryDisplay.TabIndex = 7;
+            this.chkBinaryDisplay.Text = "Display";
+            this.chkBinaryDisplay.UseVisualStyleBackColor = true;
+            // 
             // lblProgramCounter
             // 
             this.lblProgramCounter.AutoSize = true;
@@ -215,6 +254,7 @@
             // 
             // grpActions
             // 
+            this.grpActions.Controls.Add(this.grpUtils);
             this.grpActions.Controls.Add(this.btnSave);
             this.grpActions.Controls.Add(this.btnExport);
             this.grpActions.Controls.Add(this.grpDebug);
@@ -227,9 +267,29 @@
             this.grpActions.TabStop = false;
             this.grpActions.Text = "Actions";
             // 
+            // grpUtils
+            // 
+            this.grpUtils.Controls.Add(this.btnSpriteCalculator);
+            this.grpUtils.Location = new System.Drawing.Point(7, 376);
+            this.grpUtils.Name = "grpUtils";
+            this.grpUtils.Size = new System.Drawing.Size(112, 137);
+            this.grpUtils.TabIndex = 7;
+            this.grpUtils.TabStop = false;
+            this.grpUtils.Text = "Utils";
+            // 
+            // btnSpriteCalculator
+            // 
+            this.btnSpriteCalculator.Location = new System.Drawing.Point(19, 34);
+            this.btnSpriteCalculator.Name = "btnSpriteCalculator";
+            this.btnSpriteCalculator.Size = new System.Drawing.Size(75, 23);
+            this.btnSpriteCalculator.TabIndex = 6;
+            this.btnSpriteCalculator.Text = "Sprite Calc";
+            this.btnSpriteCalculator.UseVisualStyleBackColor = true;
+            this.btnSpriteCalculator.Click += new System.EventHandler(this.btnSpriteCalculator_Click);
+            // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(26, 86);
+            this.btnSave.Location = new System.Drawing.Point(25, 86);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 5;
@@ -239,7 +299,7 @@
             // 
             // btnExport
             // 
-            this.btnExport.Location = new System.Drawing.Point(27, 115);
+            this.btnExport.Location = new System.Drawing.Point(25, 115);
             this.btnExport.Name = "btnExport";
             this.btnExport.Size = new System.Drawing.Size(75, 23);
             this.btnExport.TabIndex = 4;
@@ -256,7 +316,7 @@
             this.grpDebug.Controls.Add(this.btnDebugReset);
             this.grpDebug.Location = new System.Drawing.Point(7, 175);
             this.grpDebug.Name = "grpDebug";
-            this.grpDebug.Size = new System.Drawing.Size(112, 234);
+            this.grpDebug.Size = new System.Drawing.Size(112, 194);
             this.grpDebug.TabIndex = 3;
             this.grpDebug.TabStop = false;
             this.grpDebug.Text = "Debug";
@@ -273,7 +333,7 @@
             // 
             // btnDebugRun
             // 
-            this.btnDebugRun.Location = new System.Drawing.Point(20, 77);
+            this.btnDebugRun.Location = new System.Drawing.Point(19, 77);
             this.btnDebugRun.Name = "btnDebugRun";
             this.btnDebugRun.Size = new System.Drawing.Size(75, 23);
             this.btnDebugRun.TabIndex = 7;
@@ -283,7 +343,7 @@
             // 
             // btnDebugDisplay
             // 
-            this.btnDebugDisplay.Location = new System.Drawing.Point(20, 205);
+            this.btnDebugDisplay.Location = new System.Drawing.Point(19, 165);
             this.btnDebugDisplay.Name = "btnDebugDisplay";
             this.btnDebugDisplay.Size = new System.Drawing.Size(75, 23);
             this.btnDebugDisplay.TabIndex = 6;
@@ -293,7 +353,7 @@
             // 
             // btnDebugStep
             // 
-            this.btnDebugStep.Location = new System.Drawing.Point(20, 48);
+            this.btnDebugStep.Location = new System.Drawing.Point(19, 48);
             this.btnDebugStep.Name = "btnDebugStep";
             this.btnDebugStep.Size = new System.Drawing.Size(75, 23);
             this.btnDebugStep.TabIndex = 5;
@@ -303,7 +363,7 @@
             // 
             // btnDebugReset
             // 
-            this.btnDebugReset.Location = new System.Drawing.Point(20, 19);
+            this.btnDebugReset.Location = new System.Drawing.Point(19, 19);
             this.btnDebugReset.Name = "btnDebugReset";
             this.btnDebugReset.Size = new System.Drawing.Size(75, 23);
             this.btnDebugReset.TabIndex = 4;
@@ -313,49 +373,13 @@
             // 
             // btnLoad
             // 
-            this.btnLoad.Location = new System.Drawing.Point(27, 28);
+            this.btnLoad.Location = new System.Drawing.Point(25, 28);
             this.btnLoad.Name = "btnLoad";
             this.btnLoad.Size = new System.Drawing.Size(75, 23);
             this.btnLoad.TabIndex = 2;
             this.btnLoad.Text = "Load";
             this.btnLoad.UseVisualStyleBackColor = true;
             this.btnLoad.Click += new System.EventHandler(this.btnLoad_Click);
-            // 
-            // chkBinaryDisplay
-            // 
-            this.chkBinaryDisplay.AutoSize = true;
-            this.chkBinaryDisplay.Checked = true;
-            this.chkBinaryDisplay.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkBinaryDisplay.Location = new System.Drawing.Point(360, 10);
-            this.chkBinaryDisplay.Name = "chkBinaryDisplay";
-            this.chkBinaryDisplay.Size = new System.Drawing.Size(60, 17);
-            this.chkBinaryDisplay.TabIndex = 7;
-            this.chkBinaryDisplay.Text = "Display";
-            this.chkBinaryDisplay.UseVisualStyleBackColor = true;
-            // 
-            // chkRegisterDisplay
-            // 
-            this.chkRegisterDisplay.AutoSize = true;
-            this.chkRegisterDisplay.Checked = true;
-            this.chkRegisterDisplay.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkRegisterDisplay.Location = new System.Drawing.Point(513, 9);
-            this.chkRegisterDisplay.Name = "chkRegisterDisplay";
-            this.chkRegisterDisplay.Size = new System.Drawing.Size(60, 17);
-            this.chkRegisterDisplay.TabIndex = 8;
-            this.chkRegisterDisplay.Text = "Display";
-            this.chkRegisterDisplay.UseVisualStyleBackColor = true;
-            // 
-            // chkMemoryDisplay
-            // 
-            this.chkMemoryDisplay.AutoSize = true;
-            this.chkMemoryDisplay.Checked = true;
-            this.chkMemoryDisplay.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkMemoryDisplay.Location = new System.Drawing.Point(660, 9);
-            this.chkMemoryDisplay.Name = "chkMemoryDisplay";
-            this.chkMemoryDisplay.Size = new System.Drawing.Size(60, 17);
-            this.chkMemoryDisplay.TabIndex = 9;
-            this.chkMemoryDisplay.Text = "Display";
-            this.chkMemoryDisplay.UseVisualStyleBackColor = true;
             // 
             // SoC
             // 
@@ -375,6 +399,7 @@
             this.tbpEmulator.ResumeLayout(false);
             this.tbpEmulator.PerformLayout();
             this.grpActions.ResumeLayout(false);
+            this.grpUtils.ResumeLayout(false);
             this.grpDebug.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -412,6 +437,8 @@
         private System.Windows.Forms.CheckBox chkBinaryDisplay;
         private System.Windows.Forms.CheckBox chkMemoryDisplay;
         private System.Windows.Forms.CheckBox chkRegisterDisplay;
+        private System.Windows.Forms.GroupBox grpUtils;
+        private System.Windows.Forms.Button btnSpriteCalculator;
     }
 }
 

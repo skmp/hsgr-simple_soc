@@ -125,7 +125,7 @@ namespace SoC.BL
                     IncreaseProgramCounter();
                     break;
                 case Command.beq:
-                    if (Register[op.Register1.Number] == Register[op.Register2.Number])
+                    if (Register[op.Register1.Number].Value.UValue == Register[op.Register2.Number].Value.UValue)
                         SetProgramCounter(ProgramCounter + op.Imm4);
                     else
                         IncreaseProgramCounter();
@@ -187,18 +187,34 @@ namespace SoC.BL
                     IncreaseProgramCounter();
                     break;
                 case Command.read_u8:
+                    UInt16 raddr_8 = Register[op.Register2.Number].Value.UValue;
+                    UInt16 rval_8 = (ushort)(Memory[raddr_8]);
+                    SetRegister(op.Register1.Number, rval_8);
                     IncreaseProgramCounter();
                     break;
                 case Command.read_s8:
+                    UInt16 raddr_s8 = Register[op.Register2.Number].Value.UValue;
+                    UInt16 rval_s8 = (ushort)(Memory[raddr_s8]);
+                    SetRegister(op.Register1.Number, rval_s8);
                     IncreaseProgramCounter();
                     break;
                 case Command.read_16:
+                    UInt16 raddr_16 = Register[op.Register2.Number].Value.UValue;
+                    UInt16 rval_16 = (ushort)(Memory[raddr_16] | (Memory[raddr_16 + 1] << 8));
+                    SetRegister(op.Register1.Number, rval_16);
                     IncreaseProgramCounter();
                     break;
                 case Command.write_8:
+                    UInt16 waddr_8 = Register[op.Register2.Number].Value.UValue;
+                    byte wval_8 = (byte)(Register[op.Register1.Number].Value.UValue & 0xff);
+                    Memory[waddr_8] = wval_8;
                     IncreaseProgramCounter();
                     break;
                 case Command.write_16:
+                    UInt16 waddr_16 = Register[op.Register2.Number].Value.UValue;
+                    UInt16 wval_16 = Register[op.Register1.Number].Value.UValue;
+                    Memory[waddr_16] = (byte)(wval_16 & 0xff);
+                    Memory[waddr_16 + 1] = (byte)((wval_16 >> 8) & 0xff);
                     IncreaseProgramCounter();
                     break;
                 case Command.jr:

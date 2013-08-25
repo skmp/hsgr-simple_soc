@@ -12,7 +12,7 @@ namespace SoC
         private double ZoomFactor = 3;
         private Emulator emulator;
         private Bitmap bitmap;
-        Color[] palette = { Color.Black, Color.Blue, Color.Green, Color.Cyan, Color.Red, Color.Purple, Color.Yellow, Color.White };
+        Color[] palette = { Color.Black, Color.Red, Color.LightGray, Color.DarkBlue, Color.Red, Color.Purple, Color.Yellow, Color.White };
 
         public EmulatorDisplay(Emulator emulator)
         {
