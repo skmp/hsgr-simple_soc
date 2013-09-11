@@ -6,7 +6,7 @@ pc = u15(imm15)
 vram[s1,s2] = s3;
 #### movh d,imm8
 r[d] = (r[d] & 0x00FF) | (u8(imm8) << 8);
-#### mov d,imm8
+#### movl d,imm8
 r[d] = u8(imm8)
 ### beq s1, s2, imm4
 if (r[s1] == r[s2]) pc += s4(imm4);
@@ -16,7 +16,7 @@ if (s16(r[s1]) > s16(r[s2])) pc += s4(imm4);
 if (u16(r[s1]) > u16(r[s2])) pc += s4(imm4);
 #### [add, sub, and, or, xor] d, s1
 r[d] = r[d] op r[s1]
-#### [add, sub] d, u4(imm4)
+#### [addi, subi] d, u4(imm4)
 r[d] = r[d] op u4(imm4)
 #### [shl, shr] d, imm4
 r[d] = r[d] op u4(imm4)
@@ -43,7 +43,7 @@ j
 ### group 1 (s1)
  x  |  0   |  1   |  2  |  3 
 --- | ---  | ---  | --- | --- 
- 0  | draw | movh | mov | beq 
+ 0  | draw | movh | movl | beq 
  4  | bgt  |  ba  |  ?  | ?
 
 ### group 2 (s2)
@@ -52,7 +52,7 @@ x   |  0  |  1  |  2  | 3
  0  | mov | add | sub | neg 
  4  | and | or  | xor | not  
  8  | shl | shr | saw | read_16
- C  | write_16 | add_i | sub_i | ?
+ C  | write_16 | addi | subi | ?
 
 ### group 3 (s3)
 jr, wait
