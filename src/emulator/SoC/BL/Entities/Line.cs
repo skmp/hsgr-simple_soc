@@ -4,7 +4,7 @@ using System;
 using System.Drawing;
 using System.Collections;
 
-namespace SoC.Entities
+namespace SoC.BL.Entities
 {
     public class Line
     {
@@ -31,9 +31,6 @@ namespace SoC.Entities
         public string[] Parse()
         {
             string sourceLine = SourceLineOrig;
-    
-            // Trim the white space from start and end
-            sourceLine = sourceLine.Trim();
 
             // Trim the comments
             int p = sourceLine.IndexOf(';');
@@ -41,6 +38,9 @@ namespace SoC.Entities
             {
                 sourceLine = sourceLine.Substring(0, p);
             }
+
+            // Trim the white space from start and end
+            sourceLine = sourceLine.Trim();
 
             // Convert all comma to space
             sourceLine = Regex.Replace(sourceLine, @"\,", " ");

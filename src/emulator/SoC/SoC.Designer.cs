@@ -39,6 +39,9 @@
             this.tctMain = new System.Windows.Forms.TabControl();
             this.tbpSource = new System.Windows.Forms.TabPage();
             this.tbpEmulator = new System.Windows.Forms.TabPage();
+            this.chkMemoryDisplay = new System.Windows.Forms.CheckBox();
+            this.chkRegisterDisplay = new System.Windows.Forms.CheckBox();
+            this.chkBinaryDisplay = new System.Windows.Forms.CheckBox();
             this.lblProgramCounter = new System.Windows.Forms.Label();
             this.lstMemory = new System.Windows.Forms.ListView();
             this.colHMemoryName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -47,6 +50,9 @@
             this.colHRegName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colHRegValue = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.grpActions = new System.Windows.Forms.GroupBox();
+            this.grpUtils = new System.Windows.Forms.GroupBox();
+            this.btnSpriteCalculator = new System.Windows.Forms.Button();
+            this.btnSave = new System.Windows.Forms.Button();
             this.btnExport = new System.Windows.Forms.Button();
             this.grpDebug = new System.Windows.Forms.GroupBox();
             this.btnDebugBreak = new System.Windows.Forms.Button();
@@ -59,23 +65,25 @@
             this.tbpSource.SuspendLayout();
             this.tbpEmulator.SuspendLayout();
             this.grpActions.SuspendLayout();
+            this.grpUtils.SuspendLayout();
             this.grpDebug.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtCode
             // 
             this.txtCode.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtCode.Location = new System.Drawing.Point(76, 6);
+            this.txtCode.Location = new System.Drawing.Point(6, 6);
             this.txtCode.Multiline = true;
             this.txtCode.Name = "txtCode";
             this.txtCode.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtCode.Size = new System.Drawing.Size(384, 472);
+            this.txtCode.Size = new System.Drawing.Size(384, 484);
             this.txtCode.TabIndex = 0;
             this.txtCode.Text = resources.GetString("txtCode.Text");
+            this.txtCode.TextChanged += new System.EventHandler(this.txtCode_TextChanged);
             // 
             // btnAssemble
             // 
-            this.btnAssemble.Location = new System.Drawing.Point(27, 57);
+            this.btnAssemble.Location = new System.Drawing.Point(25, 57);
             this.btnAssemble.Name = "btnAssemble";
             this.btnAssemble.Size = new System.Drawing.Size(75, 23);
             this.btnAssemble.TabIndex = 1;
@@ -115,7 +123,7 @@
             // colHError
             // 
             this.colHError.Text = "";
-            this.colHError.Width = 200;
+            this.colHError.Width = 300;
             // 
             // tctMain
             // 
@@ -141,6 +149,9 @@
             // 
             // tbpEmulator
             // 
+            this.tbpEmulator.Controls.Add(this.chkMemoryDisplay);
+            this.tbpEmulator.Controls.Add(this.chkRegisterDisplay);
+            this.tbpEmulator.Controls.Add(this.chkBinaryDisplay);
             this.tbpEmulator.Controls.Add(this.lblProgramCounter);
             this.tbpEmulator.Controls.Add(this.lstMemory);
             this.tbpEmulator.Controls.Add(this.lstRegister);
@@ -152,6 +163,42 @@
             this.tbpEmulator.TabIndex = 1;
             this.tbpEmulator.Text = "Emulator";
             this.tbpEmulator.UseVisualStyleBackColor = true;
+            // 
+            // chkMemoryDisplay
+            // 
+            this.chkMemoryDisplay.AutoSize = true;
+            this.chkMemoryDisplay.Checked = true;
+            this.chkMemoryDisplay.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkMemoryDisplay.Location = new System.Drawing.Point(660, 9);
+            this.chkMemoryDisplay.Name = "chkMemoryDisplay";
+            this.chkMemoryDisplay.Size = new System.Drawing.Size(60, 17);
+            this.chkMemoryDisplay.TabIndex = 9;
+            this.chkMemoryDisplay.Text = "Display";
+            this.chkMemoryDisplay.UseVisualStyleBackColor = true;
+            // 
+            // chkRegisterDisplay
+            // 
+            this.chkRegisterDisplay.AutoSize = true;
+            this.chkRegisterDisplay.Checked = true;
+            this.chkRegisterDisplay.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkRegisterDisplay.Location = new System.Drawing.Point(513, 9);
+            this.chkRegisterDisplay.Name = "chkRegisterDisplay";
+            this.chkRegisterDisplay.Size = new System.Drawing.Size(60, 17);
+            this.chkRegisterDisplay.TabIndex = 8;
+            this.chkRegisterDisplay.Text = "Display";
+            this.chkRegisterDisplay.UseVisualStyleBackColor = true;
+            // 
+            // chkBinaryDisplay
+            // 
+            this.chkBinaryDisplay.AutoSize = true;
+            this.chkBinaryDisplay.Checked = true;
+            this.chkBinaryDisplay.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkBinaryDisplay.Location = new System.Drawing.Point(360, 10);
+            this.chkBinaryDisplay.Name = "chkBinaryDisplay";
+            this.chkBinaryDisplay.Size = new System.Drawing.Size(60, 17);
+            this.chkBinaryDisplay.TabIndex = 7;
+            this.chkBinaryDisplay.Text = "Display";
+            this.chkBinaryDisplay.UseVisualStyleBackColor = true;
             // 
             // lblProgramCounter
             // 
@@ -189,23 +236,26 @@
             this.colHRegName,
             this.colHRegValue});
             this.lstRegister.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lstRegister.Location = new System.Drawing.Point(591, 34);
+            this.lstRegister.Location = new System.Drawing.Point(513, 34);
             this.lstRegister.Name = "lstRegister";
-            this.lstRegister.Size = new System.Drawing.Size(129, 257);
+            this.lstRegister.Size = new System.Drawing.Size(207, 257);
             this.lstRegister.TabIndex = 4;
             this.lstRegister.UseCompatibleStateImageBehavior = false;
             this.lstRegister.View = System.Windows.Forms.View.Details;
             // 
             // colHRegName
             // 
-            this.colHRegName.Text = "Register";
+            this.colHRegName.Text = "Reg";
             // 
             // colHRegValue
             // 
             this.colHRegValue.Text = "Value";
+            this.colHRegValue.Width = 120;
             // 
             // grpActions
             // 
+            this.grpActions.Controls.Add(this.grpUtils);
+            this.grpActions.Controls.Add(this.btnSave);
             this.grpActions.Controls.Add(this.btnExport);
             this.grpActions.Controls.Add(this.grpDebug);
             this.grpActions.Controls.Add(this.btnLoad);
@@ -217,9 +267,39 @@
             this.grpActions.TabStop = false;
             this.grpActions.Text = "Actions";
             // 
+            // grpUtils
+            // 
+            this.grpUtils.Controls.Add(this.btnSpriteCalculator);
+            this.grpUtils.Location = new System.Drawing.Point(7, 376);
+            this.grpUtils.Name = "grpUtils";
+            this.grpUtils.Size = new System.Drawing.Size(112, 137);
+            this.grpUtils.TabIndex = 7;
+            this.grpUtils.TabStop = false;
+            this.grpUtils.Text = "Utils";
+            // 
+            // btnSpriteCalculator
+            // 
+            this.btnSpriteCalculator.Location = new System.Drawing.Point(19, 34);
+            this.btnSpriteCalculator.Name = "btnSpriteCalculator";
+            this.btnSpriteCalculator.Size = new System.Drawing.Size(75, 23);
+            this.btnSpriteCalculator.TabIndex = 6;
+            this.btnSpriteCalculator.Text = "Sprite Calc";
+            this.btnSpriteCalculator.UseVisualStyleBackColor = true;
+            this.btnSpriteCalculator.Click += new System.EventHandler(this.btnSpriteCalculator_Click);
+            // 
+            // btnSave
+            // 
+            this.btnSave.Location = new System.Drawing.Point(25, 86);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(75, 23);
+            this.btnSave.TabIndex = 5;
+            this.btnSave.Text = "Save";
+            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            // 
             // btnExport
             // 
-            this.btnExport.Location = new System.Drawing.Point(27, 86);
+            this.btnExport.Location = new System.Drawing.Point(25, 115);
             this.btnExport.Name = "btnExport";
             this.btnExport.Size = new System.Drawing.Size(75, 23);
             this.btnExport.TabIndex = 4;
@@ -234,9 +314,9 @@
             this.grpDebug.Controls.Add(this.btnDebugDisplay);
             this.grpDebug.Controls.Add(this.btnDebugStep);
             this.grpDebug.Controls.Add(this.btnDebugReset);
-            this.grpDebug.Location = new System.Drawing.Point(7, 137);
+            this.grpDebug.Location = new System.Drawing.Point(7, 175);
             this.grpDebug.Name = "grpDebug";
-            this.grpDebug.Size = new System.Drawing.Size(112, 234);
+            this.grpDebug.Size = new System.Drawing.Size(112, 194);
             this.grpDebug.TabIndex = 3;
             this.grpDebug.TabStop = false;
             this.grpDebug.Text = "Debug";
@@ -253,7 +333,7 @@
             // 
             // btnDebugRun
             // 
-            this.btnDebugRun.Location = new System.Drawing.Point(20, 77);
+            this.btnDebugRun.Location = new System.Drawing.Point(19, 77);
             this.btnDebugRun.Name = "btnDebugRun";
             this.btnDebugRun.Size = new System.Drawing.Size(75, 23);
             this.btnDebugRun.TabIndex = 7;
@@ -263,7 +343,7 @@
             // 
             // btnDebugDisplay
             // 
-            this.btnDebugDisplay.Location = new System.Drawing.Point(20, 205);
+            this.btnDebugDisplay.Location = new System.Drawing.Point(19, 165);
             this.btnDebugDisplay.Name = "btnDebugDisplay";
             this.btnDebugDisplay.Size = new System.Drawing.Size(75, 23);
             this.btnDebugDisplay.TabIndex = 6;
@@ -273,7 +353,7 @@
             // 
             // btnDebugStep
             // 
-            this.btnDebugStep.Location = new System.Drawing.Point(20, 48);
+            this.btnDebugStep.Location = new System.Drawing.Point(19, 48);
             this.btnDebugStep.Name = "btnDebugStep";
             this.btnDebugStep.Size = new System.Drawing.Size(75, 23);
             this.btnDebugStep.TabIndex = 5;
@@ -283,7 +363,7 @@
             // 
             // btnDebugReset
             // 
-            this.btnDebugReset.Location = new System.Drawing.Point(20, 19);
+            this.btnDebugReset.Location = new System.Drawing.Point(19, 19);
             this.btnDebugReset.Name = "btnDebugReset";
             this.btnDebugReset.Size = new System.Drawing.Size(75, 23);
             this.btnDebugReset.TabIndex = 4;
@@ -293,7 +373,7 @@
             // 
             // btnLoad
             // 
-            this.btnLoad.Location = new System.Drawing.Point(27, 28);
+            this.btnLoad.Location = new System.Drawing.Point(25, 28);
             this.btnLoad.Name = "btnLoad";
             this.btnLoad.Size = new System.Drawing.Size(75, 23);
             this.btnLoad.TabIndex = 2;
@@ -310,14 +390,16 @@
             this.Controls.Add(this.tctMain);
             this.Name = "SoC";
             this.Text = "SoC";
-            this.Load += new System.EventHandler(this.frmCPU_Load);
-            this.Resize += new System.EventHandler(this.frmCPU_Resize);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SoC_FormClosing);
+            this.Load += new System.EventHandler(this.SoC_Load);
+            this.Resize += new System.EventHandler(this.SoC_Resize);
             this.tctMain.ResumeLayout(false);
             this.tbpSource.ResumeLayout(false);
             this.tbpSource.PerformLayout();
             this.tbpEmulator.ResumeLayout(false);
             this.tbpEmulator.PerformLayout();
             this.grpActions.ResumeLayout(false);
+            this.grpUtils.ResumeLayout(false);
             this.grpDebug.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -351,6 +433,12 @@
         private System.Windows.Forms.Button btnDebugBreak;
         private System.Windows.Forms.Button btnDebugRun;
         private System.Windows.Forms.Label lblProgramCounter;
+        private System.Windows.Forms.Button btnSave;
+        private System.Windows.Forms.CheckBox chkBinaryDisplay;
+        private System.Windows.Forms.CheckBox chkMemoryDisplay;
+        private System.Windows.Forms.CheckBox chkRegisterDisplay;
+        private System.Windows.Forms.GroupBox grpUtils;
+        private System.Windows.Forms.Button btnSpriteCalculator;
     }
 }
 

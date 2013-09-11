@@ -46,21 +46,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assembler.cs" />
-    <Compile Include="Emulator.cs" />
+    <Compile Include="BL\Assembler.cs" />
+    <Compile Include="BL\Emulator.cs" />
+    <Compile Include="BL\Entities\AssemblerOutput.cs" />
     <Compile Include="EmulatorDisplay.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="EmulatorDisplay.Designer.cs">
       <DependentUpon>EmulatorDisplay.cs</DependentUpon>
     </Compile>
-    <Compile Include="Entities\Line.cs" />
-    <Compile Include="Entities\Opcode.cs" />
-    <Compile Include="Entities\OpcodeDictionary.cs" />
-    <Compile Include="Entities\OpcodeType.cs" />
-    <Compile Include="Entities\Register.cs" />
-    <Compile Include="Entities\RegisterDictionary.cs" />
-    <Compile Include="Entities\RomItem.cs" />
+    <Compile Include="BL\Events\DisplayMemoryChangedEventArgs.cs" />
+    <Compile Include="BL\Events\ProgramCounterChangedEventArgs.cs" />
+    <Compile Include="BL\Events\RegisterChangedEventArgs.cs" />
+    <Compile Include="BL\Entities\Command.cs" />
+    <Compile Include="BL\Entities\Line.cs" />
+    <Compile Include="BL\Entities\Opcode.cs" />
+    <Compile Include="BL\Entities\OpcodeDictionary.cs" />
+    <Compile Include="BL\Entities\OpcodeType.cs" />
+    <Compile Include="BL\Entities\Register.cs" />
+    <Compile Include="BL\Entities\RegisterDictionary.cs" />
+    <Compile Include="BL\Entities\RomItem.cs" />
     <Compile Include="SoC.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -69,6 +74,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpriteCalculator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SpriteCalculator.Designer.cs">
+      <DependentUpon>SpriteCalculator.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="EmulatorDisplay.resx">
       <DependentUpon>EmulatorDisplay.cs</DependentUpon>
     </EmbeddedResource>
@@ -84,6 +95,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="SpriteCalculator.resx">
+      <DependentUpon>SpriteCalculator.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -93,6 +107,16 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="artwork\mario_left_3.bmp" />
+    <Content Include="artwork\mario_left_2.bmp" />
+    <Content Include="artwork\mario_right_1.bmp" />
+    <Content Include="artwork\mario_right_2.bmp" />
+    <Content Include="artwork\mario_right_3.bmp" />
+    <Content Include="artwork\donkey_kong_master.bmp" />
+    <Content Include="artwork\mario_left_1.bmp" />
+    <Content Include="Thoughts.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -7,8 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using SoC.Entities;
+using SoC.BL.Entities;
 using System.Reflection;
+using SoC.BL;
+using SoC.BL.Events;
 
 namespace SoC
 {
@@ -20,10 +22,10 @@ namespace SoC
         }
 
         // Event handlers
-        #region private void frmCPU_Load(object sender, EventArgs e)
-        private void frmCPU_Load(object sender, EventArgs e)
+        #region private void SoC_Load(object sender, EventArgs e)
+        private void SoC_Load(object sender, EventArgs e)
         {
-            frmCPU_Resize(sender, e);
+            SoC_Resize(sender, e);
 
             var doubleBufferPropertyInfo = lstBinary.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
             doubleBufferPropertyInfo.SetValue(lstBinary, true, null);
@@ -31,8 +33,8 @@ namespace SoC
             doubleBufferPropertyInfo.SetValue(lstMemory, true, null);
         }
         #endregion
-        #region private void frmCPU_Resize(object sender, EventArgs e)
-        private void frmCPU_Resize(object sender, EventArgs e)
+        #region private void SoC_Resize(object sender, EventArgs e)
+        private void SoC_Resize(object sender, EventArgs e)
         {
             int dx = 12, dy = 12;
 
@@ -51,22 +53,38 @@ namespace SoC
 
             lstBinary.Location = new Point(dx, 2 * dy + lblProgramCounter.Height);
             lstBinary.Size = new Size(tbpEmulator.Size.Width - lstRegister.Size.Width - lstMemory.Size.Width - 4 * dx, tbpEmulator.Size.Height - 3 * dy - lblProgramCounter.Height);
+            chkBinaryDisplay.Location = new Point(lstBinary.Location.X + lstBinary.Size.Width - chkBinaryDisplay.Width, dy);
 
-            lstRegister.Location = new Point(dx + lstBinary.Size.Width + dx, dy);
-            lstRegister.Size = new Size(lstRegister.Size.Width, tbpEmulator.Size.Height - 2 * dy);
+            lstRegister.Location = new Point(dx + lstBinary.Size.Width + dx, lstBinary.Location.Y);
+            lstRegister.Size = new Size(lstRegister.Size.Width, lstBinary.Size.Height);
+            chkRegisterDisplay.Location = new Point(lstRegister.Location.X + lstRegister.Size.Width - chkRegisterDisplay.Width, dy);
 
-            lstMemory.Location = new Point(dx + lstBinary.Size.Width + dx + lstRegister.Size.Width + dx, dy);
-            lstMemory.Size = new Size(lstMemory.Size.Width, tbpEmulator.Size.Height - 2 * dy);
+            lstMemory.Location = new Point(dx + lstBinary.Size.Width + dx + lstRegister.Size.Width + dx, lstBinary.Location.Y);
+            lstMemory.Size = new Size(lstMemory.Size.Width, lstBinary.Size.Height);
+            chkMemoryDisplay.Location = new Point(lstMemory.Location.X + lstMemory.Size.Width - chkMemoryDisplay.Width, dy);
+        }
+        #endregion
+        #region private void SoC_FormClosing(object sender, FormClosingEventArgs e)
+        private void SoC_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (emulator != null)
+                emulator.Break();
         }
         #endregion
         #region private void tctMain_SelectedIndexChanged(object sender, EventArgs e)
         private void tctMain_SelectedIndexChanged(object sender, EventArgs e)
         {
-            frmCPU_Resize(sender, e);
+            SoC_Resize(sender, e);
+        }
+        #endregion
+        #region private void txtCode_TextChanged(object sender, EventArgs e)
+        private void txtCode_TextChanged(object sender, EventArgs e)
+        {
+            Memory = null;
         }
         #endregion
 
-        // Load a new source file
+        // Load - Assemble - Save
         #region private void btnLoad_Click(object sender, EventArgs e)
         private void btnLoad_Click(object sender, EventArgs e)
         {
@@ -75,40 +93,82 @@ namespace SoC
             OpenFileDialog ofdLoad = new OpenFileDialog();
 
             //ofdLoad.InitialDirectory = "c:\\";
-            ofdLoad.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-            ofdLoad.FilterIndex = 2;
+            ofdLoad.Filter = "asm files (*.asm)|*.asm|bin files (*.bin)|*.bin";
+            ofdLoad.FilterIndex = 1;
             ofdLoad.RestoreDirectory = true;
 
             if (ofdLoad.ShowDialog() == DialogResult.OK)
             {
+                Source = null;
+                Program = null;
+                Memory = null;
+
                 try
                 {
-                    if ((fileStream = ofdLoad.OpenFile()) != null)
+                    if (ofdLoad.FileName.ToLower().EndsWith("asm"))
                     {
-                        using (fileStream)
+                        if ((fileStream = ofdLoad.OpenFile()) != null)
                         {
-                            using (StreamReader reader = new StreamReader(fileStream))
+                            using (fileStream)
                             {
-                                txtCode.Text = reader.ReadToEnd();
+                                using (StreamReader reader = new StreamReader(fileStream))
+                                {
+                                    txtCode.Text = reader.ReadToEnd();
+                                }
                             }
                         }
+                        else
+                            throw new Exception("Cannot open asm file. [" + ofdLoad.FileName + "]");
+                    }
+                    else if (ofdLoad.FileName.ToLower().EndsWith("bin"))
+                    {
+                        if ((fileStream = ofdLoad.OpenFile()) != null)
+                        {
+                            using (fileStream)
+                            {
+                                if (fileStream.Length != 32768)
+                                {
+                                    throw new Exception("File is not exactly 32768 bytes long");
+                                }
+                                using (BinaryReader reader = new BinaryReader(fileStream))
+                                {
+                                    int bytes = reader.Read(Memory, 0, 32768);
+                                    if (bytes != 32768)
+                                    {
+                                        throw new Exception("Could not read exactly 32768 bytes");
+                                    }
+                                }
+                            }
+                        }
+                        else
+                            throw new Exception("Cannot open asm file. [" + ofdLoad.FileName + "]");
+                    }
+                    else
+                    {
+                        throw new Exception("Unknown filetype. [" + ofdLoad.FileName + "]");
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
+                    MessageBox.Show("Could not read file from disk. Error: " + ex.Message);
                 }
             }
         }
         #endregion
-        // Assemble the source file
         #region private void btnAssemble_Click(object sender, EventArgs e)
         private void btnAssemble_Click(object sender, EventArgs e)
         {
             InitializeEmulator();
         }
         #endregion
-        // Export the assembled source
+        #region private void btnSave_Click(object sender, EventArgs e)
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+
+        }
+        #endregion
+
+        // Export
         private void btnExport_Click(object sender, EventArgs e)
         {
             // export the compiled program in a format suitable to be used in the fpga
@@ -116,17 +176,25 @@ namespace SoC
 
         List<Line> Source = null;
         Dictionary<int, Opcode> Program = null;
+        byte[] Memory = null;
         Emulator emulator = null;
         EmulatorDisplay display = null;
 
         #region private void btnDebugReset_Click(object sender, EventArgs e)
         private void btnDebugReset_Click(object sender, EventArgs e)
         {
-            // reset the emulator state to the start options (probably has to be configurable)
-            tctMain.SelectedTab = tbpEmulator;
+            try
+            {
+                // reset the emulator state to the start options (probably has to be configurable)
+                tctMain.SelectedTab = tbpEmulator;
 
-            InitializeEmulator();
-            emulator.Reset();
+                InitializeEmulator();
+                emulator.Reset();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
         #endregion
         #region private void btnDebugStep_Click(object sender, EventArgs e)
@@ -134,6 +202,9 @@ namespace SoC
         {
             try
             {
+                if (emulator == null)
+                    return;
+
                 tctMain.SelectedTab = tbpEmulator;
                 emulator.Step();
             }
@@ -148,6 +219,9 @@ namespace SoC
         {
             try
             {
+                if (emulator == null)
+                    return;
+
                 tctMain.SelectedTab = tbpEmulator;
                 emulator.Run();
             }
@@ -162,6 +236,9 @@ namespace SoC
         {
             try
             {
+                if (emulator == null)
+                    return;
+
                 tctMain.SelectedTab = tbpEmulator;
                 emulator.Break();
             }
@@ -178,7 +255,7 @@ namespace SoC
                 return;
 
             // show the display as a popup (always on top?)
-            if (display == null)
+            if (display == null || display.IsDisposed)
             {
                 display = new EmulatorDisplay(emulator);
             }
@@ -190,17 +267,19 @@ namespace SoC
         // private helpers
         private void InitializeEmulator()
         {
-            Assembler a = new Assembler();
-
-            // Parse the program
-            StringReader sr = new StringReader(txtCode.Text);
-            Source = a.Parse(sr);
-            sr.Close();
-
             // Assemble the program
-            Program = a.Assemble(Source);
-            DisplaySource(Source);
-            DisplayRegisters();
+            if (Memory == null)
+            {
+                AssemblerOutput asout = Assembler.Assemble(txtCode.Text);
+                Source = asout.Source;
+                Program = asout.Binary;
+                Memory = asout.Memory;
+            }
+
+            if (Source != null)
+                DisplaySource(Source);
+            else
+                DisplayBinary(Program);
 
             tctMain.SelectedTab = tbpEmulator;
 
@@ -208,26 +287,34 @@ namespace SoC
             emulator.ProgramCounterChanged += new ProgramCounterChangedEventHandler(emulator_ProgramCounterChanged);
             emulator.RegisterChanged += new RegisterChangedEventHandler(emulator_RegisterChanged);
             emulator.Reset();
+
+            DisplayRegisters(emulator.Register);
         }
 
         void emulator_RegisterChanged(object o, RegisterChangedEventArgs e)
         {
-            lstRegister.Items[e.Register].SubItems[1].Text = "0x" + e.Value.ToString("X").PadLeft(4, '0');
-        }
+            if (!chkRegisterDisplay.Checked)
+                return;
 
+            e.Register.ListViewItem.SubItems[1].Text = e.Register.ValueString;
+            lstRegister.Refresh();
+        }
         void emulator_ProgramCounterChanged(object o, ProgramCounterChangedEventArgs e)
         {
+            if (!chkBinaryDisplay.Checked)
+                return;
+
             if (e.OldLine != null)
             {
-                e.OldLine.ListViewItem[e.OldProgramCounter - e.OldLine.Opcodes[0].Address].BackColor = Color.White;
-                e.OldLine.ListViewItem[e.OldProgramCounter - e.OldLine.Opcodes[0].Address].ForeColor = Color.Black;
+                e.OldLine.ListViewItem[(e.OldProgramCounter - e.OldLine.Opcodes[0].Address) / 2].BackColor = Color.White;
+                e.OldLine.ListViewItem[(e.OldProgramCounter - e.OldLine.Opcodes[0].Address) / 2].ForeColor = Color.Black;
             }
             if (e.NewLine != null)
             {
-                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].BackColor = Color.Green;
-                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].ForeColor = Color.White;
+                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address) / 2].BackColor = Color.Green;
+                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address) / 2].ForeColor = Color.White;
 
-                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].EnsureVisible();
+                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address) / 2].EnsureVisible();
             }
 
             lblProgramCounter.Text = "0x" + e.NewProgramCounter.ToString("X").PadLeft(4, '0');
@@ -242,11 +329,12 @@ namespace SoC
         }
         #endregion
         #region private void DisplayRegisters()
-        private void DisplayRegisters()
+        private void DisplayRegisters(Register[] list)
         {
             lstRegister.Items.Clear();
-            foreach (String reg in RegisterDictionary.registerDictionary.Keys)
-                lstRegister.Items.Add(RegisterDictionary.registerDictionary[reg].ListViewItem);
+
+            foreach (Register reg in list)
+                lstRegister.Items.Add(reg.ListViewItem);
         }
         #endregion
         #region private void DisplayBinary(Dictionary<int, Line> binary)
@@ -276,5 +364,11 @@ namespace SoC
             }
         }
         #endregion
+
+        private void btnSpriteCalculator_Click(object sender, EventArgs e)
+        {
+            SpriteCalculator w = new SpriteCalculator();
+            w.Show();
+        }
     }
 }

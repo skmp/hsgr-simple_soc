@@ -1,63 +1,67 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
+using SoC.BL;
+using SoC.BL.Events;
+using System.Drawing.Imaging;
 
 namespace SoC
 {
     public partial class EmulatorDisplay : Form
     {
-        // Reference to the emulator
+        private double ZoomFactor = 3;
         private Emulator emulator;
-        // The display
-        private Bitmap display;
+        private Bitmap bitmap;
+        Color[] palette = { Color.Black, Color.Red, Color.LightGray, Color.DarkBlue, Color.Red, Color.Purple, Color.Yellow, Color.White };
 
         public EmulatorDisplay(Emulator emulator)
         {
             InitializeComponent();
-
             this.emulator = emulator;
         }
 
         // Event handlers
-        #region private void EmulatorDisplay_Paint(object sender, PaintEventArgs e)
-        private void EmulatorDisplay_Paint(object sender, PaintEventArgs e)
+        #region private void EmulatorDisplay_Load(object sender, EventArgs e)
+        private void EmulatorDisplay_Load(object sender, EventArgs e)
         {
-            e.Graphics.DrawImage(display, 0, 0, ClientSize.Width, ClientSize.Height);
+            bitmap = new Bitmap(emulator.Display.GetLength(0), emulator.Display.GetLength(1), PixelFormat.Format32bppPArgb);
+
+            for (int Xcount = 0; Xcount < bitmap.Width; Xcount++)
+            {
+                for (int Ycount = 0; Ycount < bitmap.Height; Ycount++)
+                {
+                    byte c = emulator.Display[Xcount, Ycount];
+                    // out of range colors set to black
+                    if (c > 7)
+                        c = 0;
+
+                    bitmap.SetPixel(Xcount, Ycount, palette[c]);
+                }
+            }
+
+            ClientSize = new Size(Convert.ToInt32(bitmap.Width * ZoomFactor), Convert.ToInt32(bitmap.Height * ZoomFactor));
+
+            emulator.DisplayMemoryChanged += new DisplayMemoryChangedEventHandler(ShowOnScreen);
+
+            pboxDisplay.Image = bitmap;
         }
         #endregion
         #region private void EmulatorDisplay_Resize(object sender, EventArgs e)
         private void EmulatorDisplay_Resize(object sender, EventArgs e)
         {
-            Refresh();
-        }
-        #endregion
-        #region private void EmulatorDisplay_Load(object sender, EventArgs e)
-        private void EmulatorDisplay_Load(object sender, EventArgs e)
-        {
-            // TODO: Get the display size from settings??
-            display = new Bitmap(200, 200);
-
-            // Set each pixel in myBitmap to black. 
-            // Set the border to red.
-            for (int Xcount = 0; Xcount < display.Width; Xcount++)
+            if (ClientSize.Width > ClientSize.Height)
             {
-                for (int Ycount = 0; Ycount < display.Height; Ycount++)
-                {
-                    if (Xcount == 0 || Ycount == 0 || Xcount == display.Width - 1 || Ycount == display.Height - 1)
-                        display.SetPixel(Xcount, Ycount, Color.Red);
-                    else
-                        display.SetPixel(Xcount, Ycount, Color.Black);
-                }
+                ZoomFactor = ClientSize.Height * 1.0 / bitmap.Height * 1.0;
+            }
+            else
+            {
+                ZoomFactor = ClientSize.Width * 1.0 / bitmap.Width * 1.0;
             }
 
-            ClientSize = new Size(3 * display.Width, 3 * display.Height);
-
-            emulator.DisplayMemoryChanged += new DisplayMemoryChangedEventHandler(ShowOnScreen);
+            pboxDisplay.Left = 0;
+            pboxDisplay.Top = 0;
+            pboxDisplay.Width = Convert.ToInt32(bitmap.Width * ZoomFactor);
+            pboxDisplay.Height = Convert.ToInt32(bitmap.Height * ZoomFactor);
         }
         #endregion
         #region private void EmulatorDisplay_FormClosing(object sender, FormClosingEventArgs e)
@@ -69,8 +73,12 @@ namespace SoC
 
         public void ShowOnScreen(object o, DisplayMemoryChangedEventArgs e)
         {
-            display.SetPixel(e.X, e.Y, e.Color);
-            Refresh();
+            int c = e.NewColor;
+            if (c < 0 || c > 7)  // sanity check
+                return;
+
+            bitmap.SetPixel(e.X, e.Y, palette[c]);
+            pboxDisplay.Invalidate(new Rectangle((int)(e.X * ZoomFactor - ZoomFactor), (int)(e.Y * ZoomFactor - ZoomFactor), (int)(2 * ZoomFactor), (int)(2 * ZoomFactor)));
         }
     }
 }

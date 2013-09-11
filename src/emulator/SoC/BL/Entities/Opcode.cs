@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SoC.Entities
+namespace SoC.BL.Entities
 {
     public class Opcode : ICloneable
     {
         // the opcode definition parts
-        public string Command { get; private set; }
+        public Command Command { get; private set; }
         public int Value { get; private set; }
+        public int Mask { get; private set; }
         public OpcodeType[] ApplicableTypes { get; private set; }
         public bool Pseudo { get; private set; }
 
@@ -17,7 +18,7 @@ namespace SoC.Entities
         public Line SourceLine { get; private set; }
 
         // the opcode values. label, type, arguments
-        public string Label { get; private set; }
+        public string Label { get; set; }
         public OpcodeType Type { get; set; }
 
         #region public Register Register1
@@ -76,6 +77,22 @@ namespace SoC.Entities
             set { _imm16 = value; }
         }
         #endregion
+        #region public int Data8
+        private int _data8;
+        public int Data8
+        {
+            get { return _data8; }
+            set { _data8 = value; }
+        }
+        #endregion
+        #region public int Data16
+        private int _data16;
+        public int Data16
+        {
+            get { return _data16; }
+            set { _data16 = value; }
+        }
+        #endregion
         #region public string Imm4label
         private string _imm4label = null;
         public string Imm4label
@@ -103,11 +120,12 @@ namespace SoC.Entities
 
 
         // constructor
-        #region public Opcode(string s, OpcodeType[] t, bool pseudo)
-        public Opcode(string command, int value, OpcodeType[] applicableTypes, bool pseudo)
+        #region public Opcode(string command, int value, int mask, OpcodeType[] applicableTypes, bool pseudo)
+        public Opcode(Command command, int value, int mask, OpcodeType[] applicableTypes, bool pseudo)
         {
             Command = command;
             Value = value;
+            Mask = mask;
             ApplicableTypes = applicableTypes;
             Pseudo = pseudo;
         }
@@ -122,7 +140,9 @@ namespace SoC.Entities
                 case OpcodeType.ThreeArg_RegRegReg:
                     return Convert.ToUInt16(Value | (Register1.Number << 8) | (Register2.Number << 4) | (Register3.Number << 0));
                 case OpcodeType.ThreeArg_RegRegImm4:
-                    return Convert.ToUInt16(Value | (Register1.Number << 8) | (Register2.Number << 4) | (Imm4 << 0));
+                    // Imm4 can be a signed number  -- generate 2's complement
+                    int i4 = (Imm4 < 0) ? (~Imm4 + 1) & 0x000f : Imm4 & 0x000f;
+                    return Convert.ToUInt16(Value | (Register1.Number << 8) | (Register2.Number << 4) | (i4 << 0));
                 case OpcodeType.ThreeArg_RegRegImm4label:
                     return Convert.ToUInt16(Value | (Register1.Number << 8) | (Register2.Number << 4) | 0); // Label is set as zero
                 case OpcodeType.TwoArg_RegReg:
@@ -133,16 +153,140 @@ namespace SoC.Entities
                     return Convert.ToUInt16(Value | (Register1.Number << 4) | (Imm4 << 0));
                 case OpcodeType.OneArg_Reg:
                     return Convert.ToUInt16(Value | (Register1.Number << 0));
+                case OpcodeType.OneArg_Imm4:
+                    return Convert.ToUInt16(Value | Imm4);
                 case OpcodeType.OneArg_Imm15:
                     return Convert.ToUInt16(Value | Imm15);
                 case OpcodeType.OneArg_Imm15label:
                     return Convert.ToUInt16(Value | 0); // Label is set as zero
                 case OpcodeType.OneArg_Imm16:
                     return 0xffff;
-                case OpcodeType.ZeroArg:
-                    return Convert.ToUInt16(Value);
+                case OpcodeType.OneArg_Data8:
+                    return Convert.ToUInt16(Data8);
+                case OpcodeType.OneArg_Data16:
+                    return Convert.ToUInt16(Data16);
                 default:
                     throw new NotImplementedException("OpcodeType not implemented [" + Type.ToString() + "]");
+            }
+        }
+        #endregion
+        #region public void SetOpcodeValue(UInt16 v)
+        public void SetOpcodeValue(UInt16 v)
+        {
+            int p, r1, r2, r3, i1;
+
+            // set default type
+            Type = ApplicableTypes[0];
+
+            // get values
+            switch (Type)
+            {
+                case OpcodeType.ThreeArg_RegRegReg:
+                    p = v & ~Mask;
+                    r1 = (p >> 8) & 0xF;
+                    r2 = (p >> 4) & 0xF;
+                    r3 = (p >> 0) & 0xF;
+
+                    if (RegisterDictionary.Contains(r1))
+                        Register1 = RegisterDictionary.Get(r1);
+                    if (RegisterDictionary.Contains(r2))
+                        Register2 = RegisterDictionary.Get(r2);
+                    if (RegisterDictionary.Contains(r3))
+                        Register3 = RegisterDictionary.Get(r3);
+                    break;
+                case OpcodeType.ThreeArg_RegRegImm4:
+                    p = v & ~Mask;
+                    r1 = (p >> 8) & 0xF;
+                    r2 = (p >> 4) & 0xF;
+                    i1 = (p >> 0) & 0xF;
+
+                    if (RegisterDictionary.Contains(r1))
+                        Register1 = RegisterDictionary.Get(r1);
+                    if (RegisterDictionary.Contains(r2))
+                        Register2 = RegisterDictionary.Get(r2);
+                    Imm4 = i1;
+                    break;
+                case OpcodeType.ThreeArg_RegRegImm4label:
+                    throw new Exception("This should never happen. [OpcodeType.ThreeArg_RegRegImm4label]");
+                case OpcodeType.TwoArg_RegReg:
+                    p = v & ~Mask;
+                    r1 = (p >> 4) & 0xF;
+                    r2 = (p >> 0) & 0xF;
+
+                    if (RegisterDictionary.Contains(r1))
+                        Register1 = RegisterDictionary.Get(r1);
+                    if (RegisterDictionary.Contains(r2))
+                        Register2 = RegisterDictionary.Get(r2);
+                    break;
+                case OpcodeType.TwoArg_RegImm8:
+                    p = v & ~Mask;
+                    r1 = (p >> 8) & 0xF;
+                    i1 = (p >> 0) & 0xFF;
+
+                    if (RegisterDictionary.Contains(r1))
+                        Register1 = RegisterDictionary.Get(r1);
+                    Imm8 = i1;
+                    break;
+                case OpcodeType.TwoArg_RegImm4:
+                    p = v & ~Mask;
+                    r1 = (p >> 4) & 0xF;
+                    i1 = (p >> 0) & 0xF;
+
+                    if (RegisterDictionary.Contains(r1))
+                        Register1 = RegisterDictionary.Get(r1);
+                    Imm4 = i1;
+                    break;
+                case OpcodeType.OneArg_Reg:
+                    p = v & ~Mask;
+                    r1 = (p >> 0) & 0xF;
+
+                    if (RegisterDictionary.Contains(r1))
+                        Register1 = RegisterDictionary.Get(r1);
+                    break;
+                case OpcodeType.OneArg_Imm4:
+                    p = v & ~Mask;
+                    i1 = (p >> 0) & 0xF;
+
+                    Imm4 = i1;
+                    break;
+                case OpcodeType.OneArg_Imm15:
+                    p = v & ~Mask;
+                    i1 = (p >> 0) & 0x7FFF;
+
+                    Imm15 = i1;
+                    break;
+                case OpcodeType.OneArg_Imm15label:
+                    throw new Exception("This should never happen. [OpcodeType.OneArg_Imm15label]");
+                case OpcodeType.TwoArg_RegImm16:
+                    throw new Exception("This should never happen. [OpcodeType.TwoArg_RegImm16]");
+                case OpcodeType.TwoArg_RegImm16label:
+                    throw new Exception("This should never happen. [OpcodeType.TwoArg_RegImm16label]");
+                case OpcodeType.TwoArg_RegImm16label_h:
+                    throw new Exception("This should never happen. [OpcodeType.TwoArg_RegImm16label_h]");
+                case OpcodeType.TwoArg_RegImm16label_l:
+                    throw new Exception("This should never happen. [OpcodeType.TwoArg_RegImm16label_l]");
+                case OpcodeType.OneArg_Imm16:
+                    throw new Exception("This should never happen. [OpcodeType.OneArg_Imm16]");
+                case OpcodeType.OneArg_Data8:
+                    throw new Exception("This should never happen. [OpcodeType.OneArg_Data8]");
+                case OpcodeType.OneArg_Data16:
+                    throw new Exception("This should never happen. [OpcodeType.OneArg_Data16]");
+                default:
+                    break;
+            }
+        }
+        #endregion
+        #region public byte[] GetOpcodeMemoryValue()
+        public byte[] GetOpcodeMemoryValue()
+        {
+            // little endian memory
+            ushort v = GetOpcodeValue();
+            switch (Type)
+            {
+                case OpcodeType.OneArg_Data8:
+                    return new byte[1] { (byte)(v & 0xff) };
+                default:
+                    return new byte[2] { (byte)(v & 0xff), (byte)((v >> 8) & 0xff) };
             }
         }
         #endregion
@@ -156,7 +300,7 @@ namespace SoC.Entities
                 case OpcodeType.ThreeArg_RegRegReg:
                     return lbl + " " + Command + " " + Register1.Name + ", " + Register2.Name + ", " + Register3.Name;
                 case OpcodeType.ThreeArg_RegRegImm4:
-                    return lbl + " " + Command + " " + Register1.Name + ", " + Register2.Name + ", " + Imm4.ToString("X");
+                     return lbl + " " + Command + " " + Register1.Name + ", " + Register2.Name + ", " + Imm4.ToString(); // Imm4 is signed
                 case OpcodeType.ThreeArg_RegRegImm4label:
                     return lbl + " " + Command + " " + Register1.Name + ", " + Register2.Name + ", " + Imm4label;
                 case OpcodeType.TwoArg_RegReg:
@@ -167,14 +311,18 @@ namespace SoC.Entities
                     return lbl + " " + Command + " " + Register1.Name + ", 0x" + Imm4.ToString("X");
                 case OpcodeType.OneArg_Reg:
                     return lbl + " " + Command + " " + Register1.Name;
+                case OpcodeType.OneArg_Imm4:
+                    return lbl + " " + Command + " " + "0x" + Imm4.ToString("X");
                 case OpcodeType.OneArg_Imm15:
-                    return lbl + " " + Command + " " + Imm15.ToString("X");
+                    return lbl + " " + Command + " " + "0x" + Imm15.ToString("X").PadLeft(4, '0');
                 case OpcodeType.OneArg_Imm15label:
                     return lbl + " " + Command + " " + Imm15label;
                 case OpcodeType.OneArg_Imm16:
-                    return lbl + " " + Command + " " + Imm16.ToString("X");
-                case OpcodeType.ZeroArg:
-                    return lbl + " " + Command;
+                    return lbl + " " + Command + " " + "0x" + Imm16.ToString("X").PadLeft(4, '0');
+                case OpcodeType.OneArg_Data8:
+                    return lbl + " " + Command + " " + "0x" + Data8.ToString("X").PadLeft(2, '0');
+                case OpcodeType.OneArg_Data16:
+                    return lbl + " " + Command + " " + "0x" + Data16.ToString("X").PadLeft(4, '0');
                 default:
                     throw new NotImplementedException("OpcodeType not implemented [" + Type.ToString() + "]");
             }
@@ -201,14 +349,12 @@ namespace SoC.Entities
         #region public object Clone()
         public object Clone()
         {
-            Opcode op = new Opcode(Command, Value, ApplicableTypes, Pseudo);
+            Opcode op = new Opcode(Command, Value, Mask, ApplicableTypes, Pseudo);
             //op.SetLabel(Label);
             //op.SetSourceLine(SourceLine);
             return op;
         }
         #endregion
-
-
         #region public void Parse(string[] args)
         public void Parse(string[] args)
         {
@@ -246,6 +392,9 @@ namespace SoC.Entities
                     case OpcodeType.OneArg_Reg:
                         argMatch = CheckArguments_OneArg_Reg(args);
                         break;
+                    case OpcodeType.OneArg_Imm4:
+                        argMatch = CheckArguments_OneArg_Imm4(args);
+                        break;
                     case OpcodeType.OneArg_Imm15:
                         argMatch = CheckArguments_OneArg_Imm15(args);
                         break;
@@ -255,8 +404,11 @@ namespace SoC.Entities
                     case OpcodeType.OneArg_Imm16:
                         argMatch = CheckArguments_OneArg_Imm16(args);
                         break;
-                    case OpcodeType.ZeroArg:
-                        argMatch = CheckArguments_ZeroArg(args);
+                    case OpcodeType.OneArg_Data8:
+                        argMatch = CheckArguments_OneArg_Data8(args);
+                        break;
+                    case OpcodeType.OneArg_Data16:
+                        argMatch = CheckArguments_OneArg_Data16(args);
                         break;
                     default:
                         throw new NotImplementedException("OpcodeType not implemented [" + t.ToString() + "]");
@@ -404,6 +556,19 @@ namespace SoC.Entities
             return argMatch;
         }
         #endregion
+        #region private bool CheckArguments_OneArg_Imm4(string[] args)
+        private bool CheckArguments_OneArg_Imm4(string[] args)
+        {
+            int argLength = args.Length;
+            bool argMatch = false;
+
+            // check argument length
+            if ((argMatch = CheckArgCount(argLength, 1)))
+                argMatch = CheckIsImm4(args[0], out _imm4);
+
+            return argMatch;
+        }
+        #endregion
         #region private bool CheckArguments_OneArg_Imm15(string[] args)
         private bool CheckArguments_OneArg_Imm15(string[] args)
         {
@@ -439,6 +604,32 @@ namespace SoC.Entities
             // check argument length
             if ((argMatch = CheckArgCount(argLength, 1)))
                 argMatch = CheckIsImm16(args[0], out _imm16);
+
+            return argMatch;
+        }
+        #endregion
+        #region private bool CheckArguments_OneArg_Data8(string[] args)
+        private bool CheckArguments_OneArg_Data8(string[] args)
+        {
+            int argLength = args.Length;
+            bool argMatch = false;
+
+            // check argument length
+            if ((argMatch = CheckArgCount(argLength, 1)))
+                argMatch = CheckIsImm8(args[0], out _data8);
+
+            return argMatch;
+        }
+        #endregion
+        #region private bool CheckArguments_OneArg_Data16(string[] args)
+        private bool CheckArguments_OneArg_Data16(string[] args)
+        {
+            int argLength = args.Length;
+            bool argMatch = false;
+
+            // check argument length
+            if ((argMatch = CheckArgCount(argLength, 1)))
+                argMatch = CheckIsImm16(args[0], out _data16);
 
             return argMatch;
         }
