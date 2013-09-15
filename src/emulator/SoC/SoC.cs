@@ -206,10 +206,53 @@ namespace SoC
             }
         }
         #endregion
+        #region private void btnExport_Click(object sender, EventArgs e)
         private void btnExport_Click(object sender, EventArgs e)
         {
-            // export the compiled program in a format suitable to be used in the fpga
+            if (Memory == null)
+            {
+                MessageBox.Show("Please first assemble your source.");
+                return;
+            }
+
+            Stream fileStream = null;
+            SaveFileDialog sfd = new SaveFileDialog();
+
+            //ofdLoad.InitialDirectory = "c:\\";
+            sfd.Filter = "mif files (*.mif)|*.mif";
+            sfd.FilterIndex = 1;
+            sfd.RestoreDirectory = true;
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                if ((fileStream = sfd.OpenFile()) != null)
+                {
+                    using (fileStream)
+                    {
+                        using (StreamWriter writer = new StreamWriter(fileStream))
+                        {
+                            writer.WriteLine("DEPTH = 8192");
+                            writer.WriteLine("WIDTH = 16");
+                            writer.WriteLine("ADDRESS_RADIX = HEX");
+                            writer.WriteLine("DATA_RADIX = HEX");
+                            writer.WriteLine("CONTENT");
+                            writer.WriteLine("BEGIN");
+                            writer.Write("0 : ");
+                            int len = 8192;
+                            for (int addr = 0; addr < len; addr++)
+                            {
+                                writer.Write(Memory[addr].ToString("X") + " ");
+                            }
+                            writer.WriteLine(";");
+                            writer.WriteLine("END");
+                        }
+                    }
+                }
+                else
+                    throw new Exception("Cannot open bin file. [" + sfd.FileName + "]");
+            }
         }
+        #endregion
         #region private void btnSpriteCalculator_Click(object sender, EventArgs e)
         private void btnSpriteCalculator_Click(object sender, EventArgs e)
         {
@@ -308,7 +351,41 @@ namespace SoC
         }
         #endregion
 
-        // private helpers
+        // Emulator events
+        #region void emulator_RegisterChanged(object o, RegisterChangedEventArgs e)
+        void emulator_RegisterChanged(object o, RegisterChangedEventArgs e)
+        {
+            if (!chkRegisterDisplay.Checked)
+                return;
+
+            e.Register.ListViewItem.SubItems[1].Text = e.Register.ValueString;
+            lstRegister.Refresh();
+        }
+        #endregion
+        #region void emulator_ProgramCounterChanged(object o, ProgramCounterChangedEventArgs e)
+        void emulator_ProgramCounterChanged(object o, ProgramCounterChangedEventArgs e)
+        {
+            if (!chkBinaryDisplay.Checked)
+                return;
+
+            if (e.OldLine != null)
+            {
+                e.OldLine.ListViewItem[e.OldProgramCounter - e.OldLine.Opcodes[0].Address].BackColor = Color.White;
+                e.OldLine.ListViewItem[e.OldProgramCounter - e.OldLine.Opcodes[0].Address].ForeColor = Color.Black;
+            }
+            if (e.NewLine != null)
+            {
+                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].BackColor = Color.Green;
+                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].ForeColor = Color.White;
+
+                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].EnsureVisible();
+            }
+
+            lblProgramCounter.Text = "0x" + e.NewProgramCounter.ToString("X").PadLeft(4, '0');
+        }
+        #endregion
+
+        // Helper functions
         private void InitializeEmulator()
         {
             // Assemble the program
@@ -339,36 +416,6 @@ namespace SoC
 
             DisplayRegisters(emulator.Register);
         }
-
-        void emulator_RegisterChanged(object o, RegisterChangedEventArgs e)
-        {
-            if (!chkRegisterDisplay.Checked)
-                return;
-
-            e.Register.ListViewItem.SubItems[1].Text = e.Register.ValueString;
-            lstRegister.Refresh();
-        }
-        void emulator_ProgramCounterChanged(object o, ProgramCounterChangedEventArgs e)
-        {
-            if (!chkBinaryDisplay.Checked)
-                return;
-
-            if (e.OldLine != null)
-            {
-                e.OldLine.ListViewItem[e.OldProgramCounter - e.OldLine.Opcodes[0].Address].BackColor = Color.White;
-                e.OldLine.ListViewItem[e.OldProgramCounter - e.OldLine.Opcodes[0].Address].ForeColor = Color.Black;
-            }
-            if (e.NewLine != null)
-            {
-                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].BackColor = Color.Green;
-                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].ForeColor = Color.White;
-
-                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].EnsureVisible();
-            }
-
-            lblProgramCounter.Text = "0x" + e.NewProgramCounter.ToString("X").PadLeft(4, '0');
-        }
-
         #region private void DisplaySource(List<Line> source)
         private void DisplaySource(List<Line> source)
         {
