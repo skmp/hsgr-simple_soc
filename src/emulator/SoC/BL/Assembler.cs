@@ -26,12 +26,12 @@ namespace SoC.BL
             List<Line> source = Parse(reader);
             Dictionary<int, Opcode> binary = Assemble(source);
 
-            byte[] memory = new byte[32 * 1024]; // 32K memory
-            Array.Clear(memory, 0, 32 * 1024);
+            UInt16[] memory = new UInt16[16 * 1024]; // 16K memory of 16 bits
+            Array.Clear(memory, 0, 16 * 1024);
 
             foreach (int address in binary.Keys)
             {
-                byte[] m = binary[address].GetOpcodeMemoryValue();
+                UInt16[] m = binary[address].GetOpcodeMemoryValue();
                 Array.Copy(m, 0, memory, address, m.Length);
             }
 
@@ -42,17 +42,10 @@ namespace SoC.BL
         #endregion
 
         // Private helpers
-        #region private static void IncreaseAddressTwoBytes(ref int addr)
-        private static void IncreaseAddressTwoBytes(ref int addr)
+        #region private static void IncreaseAddress(ref int addr)
+        private static void IncreaseAddress(ref int addr)
         {
-            // 16 bit commands on a 8bit memory
-            addr += 2;
-        }
-        #endregion
-        #region private static void IncreaseAddressOneByte(ref int addr)
-        private static void IncreaseAddressOneByte(ref int addr)
-        {
-            addr += 1;
+            addr ++;
         }
         #endregion
         #region private static List<Line> Parse(TextReader reader)
@@ -96,10 +89,7 @@ namespace SoC.BL
                         ria = new RomItem[1];
                         ria[0] = new RomItem(address, op);
 
-                        if (op.Command == Command.db)
-                            IncreaseAddressOneByte(ref address);
-                        else
-                            IncreaseAddressTwoBytes(ref address);
+                        IncreaseAddress(ref address);
                     }
                     else // Handle Assembler pseudo instructions
                     {
@@ -168,6 +158,23 @@ namespace SoC.BL
             }
             else if (op.Command == Command.li) // Load Immediate
             {
+                ri = new RomItem(address, OpcodeDictionary.Get("movl"));
+                ri.Opcode.Register1 = op.Register1;
+                if (op.Type == OpcodeType.TwoArg_RegImm16label)
+                {
+                    ri.Opcode.Imm16label = op.Imm16label;
+                    ri.Opcode.Type = OpcodeType.TwoArg_RegImm16label_l;
+                }
+                else
+                {
+                    ri.Opcode.Imm8 = op.Imm16 & 0xFF;
+                    ri.Opcode.Type = OpcodeType.TwoArg_RegImm8;
+                }
+                ri.Opcode.Label = op.Label;
+                ri.Opcode.SetSourceLine(op.SourceLine);
+                arl.Add(ri);
+                IncreaseAddress(ref address);
+
                 ri = new RomItem(address, OpcodeDictionary.Get("movh"));
                 ri.Opcode.Register1 = op.Register1;
                 if (op.Type == OpcodeType.TwoArg_RegImm16label)
@@ -180,64 +187,37 @@ namespace SoC.BL
                     ri.Opcode.Imm8 = op.Imm16 >> 8;
                     ri.Opcode.Type = OpcodeType.TwoArg_RegImm8;
                 }
-                ri.Opcode.Label = op.Label;
                 ri.Opcode.SetSourceLine(op.SourceLine);
                 arl.Add(ri);
-                IncreaseAddressTwoBytes(ref address);
-
-                ri = new RomItem(address, OpcodeDictionary.Get("movl"));
-                ri.Opcode.Register1 = op.Register1;
-                if (op.Type == OpcodeType.TwoArg_RegImm16label)
-                {
-                    ri.Opcode.Imm16label = op.Imm16label; 
-                    ri.Opcode.Type = OpcodeType.TwoArg_RegImm16label_l;
-                }
-                else
-                {
-                    ri.Opcode.Imm8 = op.Imm16 & 0xFF;
-                    ri.Opcode.Type = OpcodeType.TwoArg_RegImm8;
-                }
-                ri.Opcode.SetSourceLine(op.SourceLine);
-                arl.Add(ri);
-                IncreaseAddressTwoBytes(ref address);
+                IncreaseAddress(ref address);
             }
             else if (op.Command == Command.jrl) // JumpRegisterLabel
             {
-                ri = new RomItem(address, OpcodeDictionary.Get("movh"));
-                ri.Opcode.Register1 = op.Register1;
-                //ri.Opcode.Imm8 = op.Imm16 >> 8;
-                ri.Opcode.Imm16label = op.Imm16label;
-                ri.Opcode.Type = OpcodeType.TwoArg_RegImm16label_h;
-                ri.Opcode.Label = op.Label;
-                ri.Opcode.SetSourceLine(op.SourceLine);
-                arl.Add(ri);
-                IncreaseAddressTwoBytes(ref address);
-
                 ri = new RomItem(address, OpcodeDictionary.Get("movl"));
                 ri.Opcode.Register1 = op.Register1;
                 //ri.Opcode.Imm8 = op.Imm16 & 0xFF;
                 ri.Opcode.Imm16label = op.Imm16label;
                 ri.Opcode.Type = OpcodeType.TwoArg_RegImm16label_l;
+                ri.Opcode.Label = op.Label;
                 ri.Opcode.SetSourceLine(op.SourceLine);
                 arl.Add(ri);
-                IncreaseAddressTwoBytes(ref address);
+                IncreaseAddress(ref address);
+
+                ri = new RomItem(address, OpcodeDictionary.Get("movh"));
+                ri.Opcode.Register1 = op.Register1;
+                //ri.Opcode.Imm8 = op.Imm16 >> 8;
+                ri.Opcode.Imm16label = op.Imm16label;
+                ri.Opcode.Type = OpcodeType.TwoArg_RegImm16label_h;
+                ri.Opcode.SetSourceLine(op.SourceLine);
+                arl.Add(ri);
+                IncreaseAddress(ref address);
 
                 ri = new RomItem(address, OpcodeDictionary.Get("jr"));
                 ri.Opcode.Register1 = op.Register1;
                 ri.Opcode.Type = OpcodeType.OneArg_Reg;
                 ri.Opcode.SetSourceLine(op.SourceLine);
                 arl.Add(ri);
-                IncreaseAddressTwoBytes(ref address);
-            }
-            else if (op.Command == Command.db) // DataByte
-            {
-                ri = new RomItem(address, OpcodeDictionary.Get("db"));
-                ri.Opcode.Data8 = op.Data8;
-                ri.Opcode.Type = OpcodeType.OneArg_Data8;
-                ri.Opcode.Label = op.Label;
-                ri.Opcode.SetSourceLine(op.SourceLine);
-                arl.Add(ri);
-                IncreaseAddressOneByte(ref address);
+                IncreaseAddress(ref address);
             }
             else if (op.Command == Command.dw) // DataWord
             {
@@ -247,7 +227,7 @@ namespace SoC.BL
                 ri.Opcode.Label = op.Label;
                 ri.Opcode.SetSourceLine(op.SourceLine);
                 arl.Add(ri);
-                IncreaseAddressTwoBytes(ref address);
+                IncreaseAddress(ref address);
             }
 
             return (RomItem[])arl.ToArray(typeof(RomItem));

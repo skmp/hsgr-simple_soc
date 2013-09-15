@@ -25,18 +25,16 @@ namespace SoC.BL.Entities
         shl,
         shr,
         sar,
-        read_u8,
-        read_s8,
         read_16,
-        write_8,
         write_16,
+        addi,
+        subi,
         jr,
         wait,
 
         org,
         li,
         jrl,
-        db,
         dw,
     }
 }

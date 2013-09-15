@@ -132,7 +132,8 @@ namespace SoC
                                 }
                                 using (BinaryReader reader = new BinaryReader(fileStream))
                                 {
-                                    int bytes = reader.Read(Memory, 0, 32768);
+                                    //int bytes = reader.Read(Memory, 0, 32768);
+                                    int bytes = 0;
                                     if (bytes != 32768)
                                     {
                                         throw new Exception("Could not read exactly 32768 bytes");
@@ -176,7 +177,7 @@ namespace SoC
 
         List<Line> Source = null;
         Dictionary<int, Opcode> Program = null;
-        byte[] Memory = null;
+        UInt16[] Memory = null;
         Emulator emulator = null;
         EmulatorDisplay display = null;
 
@@ -306,15 +307,15 @@ namespace SoC
 
             if (e.OldLine != null)
             {
-                e.OldLine.ListViewItem[(e.OldProgramCounter - e.OldLine.Opcodes[0].Address) / 2].BackColor = Color.White;
-                e.OldLine.ListViewItem[(e.OldProgramCounter - e.OldLine.Opcodes[0].Address) / 2].ForeColor = Color.Black;
+                e.OldLine.ListViewItem[e.OldProgramCounter - e.OldLine.Opcodes[0].Address].BackColor = Color.White;
+                e.OldLine.ListViewItem[e.OldProgramCounter - e.OldLine.Opcodes[0].Address].ForeColor = Color.Black;
             }
             if (e.NewLine != null)
             {
-                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address) / 2].BackColor = Color.Green;
-                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address) / 2].ForeColor = Color.White;
+                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].BackColor = Color.Green;
+                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].ForeColor = Color.White;
 
-                e.NewLine.ListViewItem[(e.NewProgramCounter - e.NewLine.Opcodes[0].Address) / 2].EnsureVisible();
+                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].EnsureVisible();
             }
 
             lblProgramCounter.Text = "0x" + e.NewProgramCounter.ToString("X").PadLeft(4, '0');

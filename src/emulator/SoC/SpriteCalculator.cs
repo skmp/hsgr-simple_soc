@@ -35,8 +35,8 @@ namespace SoC
 
                 StringBuilder sb = new StringBuilder();
 
-                sb.Append(Path.GetFileNameWithoutExtension(ofdLoad.FileName) + " DB " + b.Width.ToString() + "  ; Width\r\n");
-                sb.Append("DB " + b.Height.ToString() + "  ; Height\r\n");
+                sb.Append(Path.GetFileNameWithoutExtension(ofdLoad.FileName) + " DW " + b.Width.ToString() + "  ; Width\r\n");
+                sb.Append("DW " + b.Height.ToString() + "  ; Height\r\n");
                 sb.Append("\r\n");
 
                 for (int r = 0; r < b.Height; r++)
@@ -44,7 +44,7 @@ namespace SoC
                     for (int c = 0; c < b.Width; c++)
                     {
                         AddPaletteEntry(b.GetPixel(c, r));
-                        sb.Append("DB " + GetPaletteIndex(b.GetPixel(c, r)) + "\r\n");
+                        sb.Append("DW " + GetPaletteIndex(b.GetPixel(c, r)) + "\r\n");
                     }
                 }
                 sb.Append("\r\n");
