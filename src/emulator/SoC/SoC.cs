@@ -84,7 +84,7 @@ namespace SoC
         }
         #endregion
 
-        // Load - Assemble - Save
+        // Load - Assemble - Save - Export - SpriteCalculator
         #region private void btnLoad_Click(object sender, EventArgs e)
         private void btnLoad_Click(object sender, EventArgs e)
         {
@@ -126,18 +126,21 @@ namespace SoC
                         {
                             using (fileStream)
                             {
-                                if (fileStream.Length != 32768)
+                                byte[] fileContents;
+
+                                if (fileStream.Length != 16384)
                                 {
-                                    throw new Exception("File is not exactly 32768 bytes long");
+                                    throw new Exception("File is not exactly 16384 bytes long");
                                 }
                                 using (BinaryReader reader = new BinaryReader(fileStream))
                                 {
-                                    //int bytes = reader.Read(Memory, 0, 32768);
-                                    int bytes = 0;
-                                    if (bytes != 32768)
-                                    {
-                                        throw new Exception("Could not read exactly 32768 bytes");
-                                    }
+                                    fileContents = new byte[16384];
+                                    reader.Read(fileContents, 0, 16384);
+                                }
+                                Memory = new ushort[8192];
+                                for (int addr = 0; addr < 8192; addr++)
+                                {
+                                    Memory[addr] = (ushort)(fileContents[2 * addr] | (fileContents[2 * addr + 1] << 8));
                                 }
                             }
                         }
@@ -153,6 +156,8 @@ namespace SoC
                 {
                     MessageBox.Show("Could not read file from disk. Error: " + ex.Message);
                 }
+
+                InitializeEmulator();
             }
         }
         #endregion
@@ -165,15 +170,53 @@ namespace SoC
         #region private void btnSave_Click(object sender, EventArgs e)
         private void btnSave_Click(object sender, EventArgs e)
         {
+            if (Memory == null)
+            {
+                MessageBox.Show("Please first assemble your source.");
+                return;
+            }
 
+            Stream fileStream = null;
+            SaveFileDialog sfd = new SaveFileDialog();
+
+            //ofdLoad.InitialDirectory = "c:\\";
+            sfd.Filter = "bin files (*.bin)|*.bin";
+            sfd.FilterIndex = 1;
+            sfd.RestoreDirectory = true;
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                if ((fileStream = sfd.OpenFile()) != null)
+                {
+                    using (fileStream)
+                    {
+                        using (BinaryWriter writer = new BinaryWriter(fileStream))
+                        {
+                            int len = Math.Min(Memory.Length, 8192);
+                            for (int addr = 0; addr < len; addr++)
+                            {
+                                writer.Write((byte)(Memory[addr] & 0xff));
+                                writer.Write((byte)((Memory[addr]>>8) & 0xff));
+                            }
+                        }
+                    }
+                }
+                else
+                    throw new Exception("Cannot open bin file. [" + sfd.FileName + "]");
+            }
         }
         #endregion
-
-        // Export
         private void btnExport_Click(object sender, EventArgs e)
         {
             // export the compiled program in a format suitable to be used in the fpga
         }
+        #region private void btnSpriteCalculator_Click(object sender, EventArgs e)
+        private void btnSpriteCalculator_Click(object sender, EventArgs e)
+        {
+            SpriteCalculator w = new SpriteCalculator();
+            w.Show();
+        }
+        #endregion
 
         List<Line> Source = null;
         Dictionary<int, Opcode> Program = null;
@@ -279,8 +322,13 @@ namespace SoC
 
             if (Source != null)
                 DisplaySource(Source);
-            else
+            else if (Program != null)
                 DisplayBinary(Program);
+            else
+            {
+                Program = ConvertMemoryToProgram(Memory);
+                DisplayBinary(Program);
+            }
 
             tctMain.SelectedTab = tbpEmulator;
 
@@ -343,33 +391,42 @@ namespace SoC
         {
             lstBinary.Items.Clear();
 
-            int labelPadding = 8;
+            int labelPadding = 10;
             foreach (Opcode op in binary.Values)
-                labelPadding = Math.Max(labelPadding, (op.Label != null) ? op.Label.Length : 0); 
+                labelPadding = Math.Max(labelPadding, (op.Label != null) ? op.Label.Length : 0);
 
             foreach (int addr in binary.Keys)
             {
                 ListViewItem lvi = new ListViewItem();
-
-                lvi.SubItems[0].Text = addr.ToString("X");
-                lvi.SubItems.Add("0x" + binary[addr].GetOpcodeValue().ToString("X"));
+                lvi.SubItems[0].Text = addr.ToString("X").PadLeft(4, '0');
+                lvi.SubItems.Add("0x" + binary[addr].GetOpcodeValue().ToString("X").PadLeft(4, '0'));
                 lvi.SubItems.Add(binary[addr].GetNormalizedSourceLine(labelPadding));
-                lvi.SubItems.Add(binary[addr].SourceLine.ErrorMessage);
-                if (!String.IsNullOrEmpty(binary[addr].SourceLine.ErrorMessage))
+                if (binary[addr].SourceLine != null)
                 {
-                    lvi.BackColor = Color.Red;
-                    lvi.ForeColor = Color.White;
+                    lvi.SubItems.Add(binary[addr].SourceLine.ErrorMessage);
+                    if (!String.IsNullOrEmpty(binary[addr].SourceLine.ErrorMessage))
+                    {
+                        lvi.BackColor = Color.Red;
+                        lvi.ForeColor = Color.White;
+                    }
                 }
 
                 lstBinary.Items.Add(lvi);
             }
         }
         #endregion
-
-        private void btnSpriteCalculator_Click(object sender, EventArgs e)
+        #region private Dictionary<int, Opcode> ConvertMemoryToProgram(UInt16[] memory)
+        private Dictionary<int, Opcode> ConvertMemoryToProgram(UInt16[] memory)
         {
-            SpriteCalculator w = new SpriteCalculator();
-            w.Show();
+            Dictionary<int, Opcode> binary = new Dictionary<int, Opcode>();
+
+            for (int addr=0; addr<8192; addr++)
+            {
+                binary.Add(addr, OpcodeDictionary.Get(memory[addr]));
+            }
+
+            return binary;
         }
+        #endregion
     }
 }
