@@ -17,7 +17,7 @@ cpu
 * dedicated vga bus
 * 8K ram x16 bits
 
-for more details check the docs/cpu folder
+[opcode spec details](cpu/opcodes.md)
 
 Sound
 -------
