@@ -1,0 +1,29 @@
+﻿Assembler
+
+The assembler recognizes specific Commands.
+The source file is split into Lines.
+Each Line generates zero or more Opcodes.
+The output of the Assembler are the initial memory contents [8K 16bit memory] and also the tagged Source.
+
+
+
+
+
+
+Emulator
+
+Initialized by
+a) Source file (.asm)
+b) Binary file (.bin)
+
+
+Internal data
+a) The memory
+b) The registers
+c) The program counter
+
+
+Generates Events
+a) ProgramCounter change
+b) Register change
+c) Memory change

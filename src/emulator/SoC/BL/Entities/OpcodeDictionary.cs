@@ -31,11 +31,10 @@ namespace SoC.BL.Entities
             list.Add(new Opcode(Command.shl, 0xE800, 0xFF00, new OpcodeType[] { OpcodeType.TwoArg_RegImm4 }, false));
             list.Add(new Opcode(Command.shr, 0xE900, 0xFF00, new OpcodeType[] { OpcodeType.TwoArg_RegImm4 }, false));
             list.Add(new Opcode(Command.sar, 0xEA00, 0xFF00, new OpcodeType[] { OpcodeType.TwoArg_RegImm4 }, false));
-            list.Add(new Opcode(Command.read_u8, 0xEB00, 0xFF00, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
-            list.Add(new Opcode(Command.read_s8, 0xEC00, 0xFF00, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
-            list.Add(new Opcode(Command.read_16, 0xED00, 0xFF00, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
-            list.Add(new Opcode(Command.write_8, 0xEE00, 0xFF00, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
-            list.Add(new Opcode(Command.write_16, 0xEF00, 0xFF00, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
+            list.Add(new Opcode(Command.read_16, 0xEB00, 0xFF00, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
+            list.Add(new Opcode(Command.write_16, 0xEC00, 0xFF00, new OpcodeType[] { OpcodeType.TwoArg_RegReg }, false));
+            list.Add(new Opcode(Command.addi, 0xED00, 0xFF00, new OpcodeType[] { OpcodeType.TwoArg_RegImm4 }, false));
+            list.Add(new Opcode(Command.subi, 0xEE00, 0xFF00, new OpcodeType[] { OpcodeType.TwoArg_RegImm4 }, false));
 
             list.Add(new Opcode(Command.jr, 0xF000, 0xFFF0, new OpcodeType[] { OpcodeType.OneArg_Reg }, false));
             list.Add(new Opcode(Command.wait, 0xF010, 0xFFF0, new OpcodeType[] { OpcodeType.OneArg_Imm4 }, false));
@@ -43,7 +42,6 @@ namespace SoC.BL.Entities
             list.Add(new Opcode(Command.org, -1, 0, new OpcodeType[] { OpcodeType.OneArg_Imm16 }, true));         // ORiGin
             list.Add(new Opcode(Command.li, -1, 0, new OpcodeType[] { OpcodeType.TwoArg_RegImm16, OpcodeType.TwoArg_RegImm16label }, true));       // LoadImmediate
             list.Add(new Opcode(Command.jrl, -1, 0, new OpcodeType[] { OpcodeType.TwoArg_RegImm16, OpcodeType.TwoArg_RegImm16label }, true)); // JumpRegisterLabel
-            list.Add(new Opcode(Command.db, -1, 0, new OpcodeType[] { OpcodeType.OneArg_Data8 }, false));  // DataByte
             list.Add(new Opcode(Command.dw, -1, 0, new OpcodeType[] { OpcodeType.OneArg_Data16 }, false)); // DataWord
 
             Dictionary = new Dictionary<string, Opcode>();

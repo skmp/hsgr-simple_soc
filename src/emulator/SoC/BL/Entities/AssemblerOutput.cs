@@ -9,9 +9,9 @@ namespace SoC.BL.Entities
     {
         public List<Line> Source;
         public Dictionary<int, Opcode> Binary;
-        public byte[] Memory;
+        public UInt16[] Memory;
 
-        public AssemblerOutput(List<Line> source, Dictionary<int, Opcode> binary, byte[] memory)
+        public AssemblerOutput(List<Line> source, Dictionary<int, Opcode> binary, UInt16[] memory)
         {
             Source = source;
             Binary = binary;

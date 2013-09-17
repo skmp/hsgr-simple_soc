@@ -37,7 +37,7 @@ namespace SoC.BL
         }
 
 
-        public Emulator(byte[] memory)
+        public Emulator(UInt16[] memory)
         {
             Register = new Register[16];
             for (int i = 0; i < 16; i++)
@@ -66,8 +66,8 @@ namespace SoC.BL
             for (int i = 0; i < 16; i++)
                 Register[i] = new Register(i, 0xffff);
 
-            Memory = new byte[32 * 1024]; // 32K memory
-            Array.Clear(Memory, 0, 32 * 1024);
+            Memory = new UInt16[16 * 1024]; // 32K memory
+            Array.Clear(Memory, 0, 16 * 1024);
 
             Display = new byte[200, 200];
             Array.Clear(Display, 0, 200 * 200);
@@ -75,7 +75,7 @@ namespace SoC.BL
 
             foreach (int address in program.Keys)
             {
-                byte[] m = program[address].GetOpcodeMemoryValue();
+                UInt16[] m = program[address].GetOpcodeMemoryValue();
                 Array.Copy(m, 0, Memory, address, m.Length);
             }
         }
@@ -83,7 +83,7 @@ namespace SoC.BL
         // State
         int ProgramCounter;
         public Register[] Register;
-        public byte[] Memory;
+        public UInt16[] Memory;
         public byte[,] Display;
 
         // Program
@@ -103,8 +103,6 @@ namespace SoC.BL
         {
             breakFlag = false;
 
-            // UInt16 o = Convert.ToUInt16((Memory[ProgramCounter+1] <<8) | Memory[ProgramCounter]);
-            // Opcode op = OpcodeDictionary.Get(o);
             Opcode op = Program[ProgramCounter];
 
             switch (op.Command)
@@ -121,7 +119,7 @@ namespace SoC.BL
                     IncreaseProgramCounter();
                     break;
                 case Command.movl:
-                    SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue & 0xFF00) | (op.Imm8 & 0xFF)));
+                    SetRegister(op.Register1.Number, (UInt16)((op.Imm8 & 0xFF)));
                     IncreaseProgramCounter();
                     break;
                 case Command.beq:
@@ -186,35 +184,24 @@ namespace SoC.BL
                     SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue >> op.Imm4) & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
-                case Command.read_u8:
-                    UInt16 raddr_8 = Register[op.Register2.Number].Value.UValue;
-                    UInt16 rval_8 = (ushort)(Memory[raddr_8]);
-                    SetRegister(op.Register1.Number, rval_8);
-                    IncreaseProgramCounter();
-                    break;
-                case Command.read_s8:
-                    UInt16 raddr_s8 = Register[op.Register2.Number].Value.UValue;
-                    UInt16 rval_s8 = (ushort)(Memory[raddr_s8]);
-                    SetRegister(op.Register1.Number, rval_s8);
-                    IncreaseProgramCounter();
-                    break;
                 case Command.read_16:
                     UInt16 raddr_16 = Register[op.Register2.Number].Value.UValue;
-                    UInt16 rval_16 = (ushort)(Memory[raddr_16] | (Memory[raddr_16 + 1] << 8));
+                    UInt16 rval_16 = (ushort)Memory[raddr_16];
                     SetRegister(op.Register1.Number, rval_16);
-                    IncreaseProgramCounter();
-                    break;
-                case Command.write_8:
-                    UInt16 waddr_8 = Register[op.Register2.Number].Value.UValue;
-                    byte wval_8 = (byte)(Register[op.Register1.Number].Value.UValue & 0xff);
-                    Memory[waddr_8] = wval_8;
                     IncreaseProgramCounter();
                     break;
                 case Command.write_16:
                     UInt16 waddr_16 = Register[op.Register2.Number].Value.UValue;
                     UInt16 wval_16 = Register[op.Register1.Number].Value.UValue;
-                    Memory[waddr_16] = (byte)(wval_16 & 0xff);
-                    Memory[waddr_16 + 1] = (byte)((wval_16 >> 8) & 0xff);
+                    Memory[waddr_16] = wval_16;
+                    IncreaseProgramCounter();
+                    break;
+                case Command.addi:
+                    SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue + op.Imm4) & 0xFFFF));
+                    IncreaseProgramCounter();
+                    break;
+                case Command.subi:
+                    SetRegister(op.Register1.Number, (UInt16)((Register[op.Register1.Number].Value.UValue - op.Imm4) & 0xFFFF));
                     IncreaseProgramCounter();
                     break;
                 case Command.jr:
@@ -256,7 +243,7 @@ namespace SoC.BL
         #region private void IncreaseProgramCounter()
         private void IncreaseProgramCounter()
         {
-            int newPC = ProgramCounter + 2;
+            int newPC = ProgramCounter + 1;
             if (newPC > 65535)
                 newPC = 0;
 
@@ -277,13 +264,6 @@ namespace SoC.BL
             UInt16 oldValue = Register[register].Value.UValue;
             Register[register].Value.UValue = value;
             FireRegisterChanged(Register[register], oldValue);
-        }
-        #endregion
-        #region private void SetRegister(int register, Int16 value)
-        private void SetRegister(int register, Int16 value)
-        {
-            FireRegisterChanged(Register[register], value);
-            Register[register].Value.SValue = value;
         }
         #endregion
         // Display
