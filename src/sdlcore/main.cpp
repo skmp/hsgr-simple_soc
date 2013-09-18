@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <cstdint>
 
 #pragma comment(lib, "SDL.lib")
 
@@ -9,6 +10,13 @@ int main(int argc, char *argv[]) {
 	realmain();
 }
 
+typedef uint16_t u16;
+typedef int16_t s16;
+
+extern u16 vga[320*240];
+
+void runframe();
+void loadfile(FILE* f);
 
 #include <SDL/SDL.h>
 
@@ -73,7 +81,33 @@ void PrintKeyInfo( SDL_KeyboardEvent *key ){
     PrintModifiers( (SDLMod)key->keysym.mod );
 }
 
+
+void put_pixel32( SDL_Surface *surface, int x, int y, Uint32 pixel )
+{
+    //Convert the pixels to 32 bit
+    Uint32 *pixels = (Uint32 *)surface->pixels;
+    
+    //Set the pixel
+    pixels[ ( y * surface->w ) + x ] = pixel;
+}
+
+uint32_t CLUT[8]= {
+	0x00000000,			//black
+	0x0000FF00,			//green
+	0x0FF00000,			//red
+
+	0x0FF000FF,			//red
+	0x0FF0FF00,			//red
+	0x0FF000F0,			//red
+
+	0x0FFFD0F0,			//red
+	0x000FD0F0,			//red
+};
+
+
 int realmain() {
+
+	loadfile(fopen("../../../asm/display_sprite.bin","rb"));
 
 	SDL_Event event;
     int quit = 0;
@@ -121,7 +155,21 @@ int realmain() {
 
 		}
 
-		SDL_FillRect(screen,NULL, 0x345340); 
+		if( SDL_MUSTLOCK( screen ) )	{	SDL_LockSurface( screen );	}
+
+		runframe();
+
+		for (int y = 0; y<240; y++) {
+			for (int x = 0; x<320; x++) {
+				put_pixel32(screen, x*2 + 0, y*2 + 0, CLUT[7&vga[y*320 + x]]);
+				put_pixel32(screen, x*2 + 0, y*2 + 1, CLUT[7&vga[y*320 + x]]);
+				put_pixel32(screen, x*2 + 1, y*2 + 0, CLUT[7&vga[y*320 + x]]);
+				put_pixel32(screen, x*2 + 1, y*2 + 1, CLUT[7&vga[y*320 + x]]);
+			}
+		}
+
+		if( SDL_MUSTLOCK( screen ) )	{	SDL_UnlockSurface( screen );	}
+
 		SDL_Flip(screen); 
 
     }
