@@ -109,13 +109,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="artwork\mario_left_1.bmp" />
     <Content Include="artwork\mario_left_3.bmp" />
-    <Content Include="artwork\mario_left_2.bmp" />
     <Content Include="artwork\mario_right_1.bmp" />
     <Content Include="artwork\mario_right_2.bmp" />
     <Content Include="artwork\mario_right_3.bmp" />
     <Content Include="artwork\donkey_kong_master.bmp" />
-    <Content Include="artwork\mario_left_1.bmp" />
+    <Content Include="artwork\mario_left_2.bmp" />
     <Content Include="Thoughts.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

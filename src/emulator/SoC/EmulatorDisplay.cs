@@ -74,11 +74,22 @@ namespace SoC
         public void ShowOnScreen(object o, DisplayMemoryChangedEventArgs e)
         {
             int c = e.NewColor;
-            if (c < 0 || c > 7)  // sanity check
+            
+            // Called on wait command to simulate VSync
+            if (c == -1)
+            {
+                pboxDisplay.Invalidate();
                 return;
-
-            bitmap.SetPixel(e.X, e.Y, palette[c]);
-            pboxDisplay.Invalidate(new Rectangle((int)(e.X * ZoomFactor - ZoomFactor), (int)(e.Y * ZoomFactor - ZoomFactor), (int)(2 * ZoomFactor), (int)(2 * ZoomFactor)));
+            }
+            else if (c < 0 || c > 7)  // sanity check
+            {
+                return;
+            }
+            else
+            {
+                bitmap.SetPixel(e.X, e.Y, palette[c]);
+                //pboxDisplay.Invalidate(new Rectangle((int)(e.X * ZoomFactor - ZoomFactor), (int)(e.Y * ZoomFactor - ZoomFactor), (int)(2 * ZoomFactor), (int)(2 * ZoomFactor)));
+            }
         }
     }
 }

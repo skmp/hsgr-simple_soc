@@ -209,7 +209,8 @@ namespace SoC.BL
                     break;
                 case Command.wait:
                     // wait for a half second
-                    Thread.Sleep(500);
+                    Thread.Sleep(70);
+                    FireDisplayMemoryChanged(0, 0, 0, -1);
                     IncreaseProgramCounter();
                     break;
                 case Command.org:
@@ -272,6 +273,8 @@ namespace SoC.BL
             // Set the new Pixel value
             int oldColor = Display[reg1.Value.UValue, reg2.Value.UValue];
             Display[reg1.Value.UValue, reg2.Value.UValue] = (byte)reg3.Value.UValue;
+            
+            // Moved to wait command to emulate the VSync
             FireDisplayMemoryChanged(reg1.Value.UValue, reg2.Value.UValue, oldColor, reg3.Value.UValue);
 
             // Return the previous Pixel value
