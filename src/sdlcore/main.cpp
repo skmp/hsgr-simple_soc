@@ -92,16 +92,16 @@ void put_pixel32( SDL_Surface *surface, int x, int y, Uint32 pixel )
 }
 
 uint32_t CLUT[8]= {
-	0x00000000,			//black
-	0x0000FF00,			//green
-	0x0FF00000,			//red
+	0xFF000000,			//black
+	0xFFFF0000,			//red
+	0xFFD3D3D3,			//lightgray
 
-	0x0FF000FF,			//red
-	0x0FF0FF00,			//red
-	0x0FF000F0,			//red
+	0xFF00008B,			//dark blue
+	0xFFFF0000,			//red
+	0xFF000F0,			//red
 
-	0x0FFFD0F0,			//red
-	0x000FD0F0,			//red
+	0xFFFD0F0,			//red
+	0x00FD0F0,			//red
 };
 
 
@@ -171,6 +171,7 @@ int realmain() {
 		if( SDL_MUSTLOCK( screen ) )	{	SDL_UnlockSurface( screen );	}
 
 		SDL_Flip(screen); 
+		SDL_Delay(70);
 
     }
 
