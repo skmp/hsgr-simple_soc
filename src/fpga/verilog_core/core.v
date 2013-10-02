@@ -53,6 +53,11 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 `define s2_undefined 15
 	
 
+`define state_fetch 0
+`define state_execute 1
+`define state_memaccess 2
+
+
 	input CLK;
 	input I_RESET;
 	input [3:0] I_SW;
@@ -63,13 +68,29 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 	output reg [3:0] O_VIDEO_R;
 	output reg [3:0] O_VIDEO_B;
 	output reg [3:0] O_VIDEO_G;
+
+	wire [12:0] ram_address;
+	wire [15:0] ram_in;
+	wire [15:0] ram_out;
 	
 	
-	reg [15:0] ram[8192-1:0];
-	reg [2:0]  vram[76800-1:0]; //320 * 240 = 76800
+	mem ram (
+	.clka(CLK), // input clka
+	.wea(0), // input [0 : 0] wea
+	.addra(ram_address), // input [12 : 0] addra
+	.dina(ram_in), // input [15 : 0] dina
+	.douta(ram_out) // output [15 : 0] douta
+	);
+
+	
+	// reg [15:0] ram[8192-1:0];
+	
+	//reg [2:0]  vram[76800-1:0]; //320 * 240 = 76800
 	
 	reg [15:0] regs[15:0];
 	reg [15:0] pc;
+	
+	reg [1:0] state;
 	
 	always@ (posedge CLK)
 	begin
@@ -81,7 +102,7 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 		//LED = 0;
 	end
 	
-	wire[15:0] opcode = ram[pc];
+	wire[15:0] opcode = ram_out;
 	
 	wire op_is_not_jump = opcode[15];
 	
@@ -121,6 +142,7 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 			regs[14]=0;
 			regs[15]=0;
 			
+			state=`state_fetch;
 			pc=0;
 			
 			LED = 4;
@@ -129,48 +151,66 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 		begin
 			//Do something
 			
-			if (op_is_not_jump == 0)
-			begin
-				pc = op_imm15;
-			end
-			else
-			begin
-				case(op_s1)
-					`s1_draw: vram[regs[op_r2]* 320 + regs[op_r3]] = regs[op_r1];
-					`s1_movh: regs[op_r1][15:8] = op_imm8;
-					`s1_movl: regs[op_r1] = op_imm8;
-					`s1_beq: pc = pc +2;
-					`s1_bgt: pc = pc +2;
-					`s1_ba: pc = pc +2;
-					`s1_ext_s2:
+			case(state)
+				`state_fetch:
+				begin
+					// advance the state
+					state=`state_execute;
+				end
+
+				`state_execute:
+				begin
+					// advance the state
+					state = `state_fetch;
+					
+					if (op_is_not_jump == 0)
 					begin
-						case (op_s2)
-							`s2_mov: regs[op_r2] = regs[op_r3];
-							`s2_add: regs[op_r2] = regs[op_r2] + regs[op_r3];
-							`s2_sub: regs[op_r2] = regs[op_r2] - regs[op_r3];
-							
-							`s2_and: regs[op_r2] = regs[op_r2] & regs[op_r3];
-							`s2_or:  regs[op_r2] = regs[op_r2] | regs[op_r3];
-							`s2_xor: regs[op_r2] = regs[op_r2] ^ regs[op_r3];
-							
-							`s2_neg: regs[op_r2] = -regs[op_r3];
-							`s2_not: regs[op_r2] = ~regs[op_r3];
+						pc = op_imm15;
+					end
+					else
+					begin
+						case(op_s1)
+							//`s1_draw: vram[regs[op_r2]* 320 + regs[op_r3]] = regs[op_r1];
+							`s1_movh: regs[op_r1][15:8] = op_imm8;
+							`s1_movl: regs[op_r1] = op_imm8;
+							`s1_beq: pc = pc +2;
+							`s1_bgt: pc = pc +2;
+							`s1_ba: pc = pc +2;
+							`s1_ext_s2:
+							begin
+								case (op_s2)
+									`s2_mov: regs[op_r2] = regs[op_r3];
+									`s2_add: regs[op_r2] = regs[op_r2] + regs[op_r3];
+									`s2_sub: regs[op_r2] = regs[op_r2] - regs[op_r3];
+									
+									`s2_and: regs[op_r2] = regs[op_r2] & regs[op_r3];
+									`s2_or:  regs[op_r2] = regs[op_r2] | regs[op_r3];
+									`s2_xor: regs[op_r2] = regs[op_r2] ^ regs[op_r3];
+									
+									`s2_neg: regs[op_r2] = -regs[op_r3];
+									`s2_not: regs[op_r2] = ~regs[op_r3];
 
-							`s2_shl: regs[op_r2] =  regs[op_r2] << op_imm4;
-							`s2_shr: regs[op_r2] = regs[op_r2] >> op_imm4;
-							`s2_sar: regs[op_r2] = regs[op_r2] >>> op_imm4;
-							`s2_read16: regs[op_r2] = ram[regs[op_r3]];
+									`s2_shl: regs[op_r2] =  regs[op_r2] << op_imm4;
+									`s2_shr: regs[op_r2] = regs[op_r2] >> op_imm4;
+									`s2_sar: regs[op_r2] = regs[op_r2] >>> op_imm4;
+									//`s2_read16: regs[op_r2] = ram[regs[op_r3]];
 
-							`s2_write16: ram[regs[op_r3]] = regs[op_r2];
-							`s2_addi: regs[op_r2] = regs[op_r2] + op_imm4;
-							`s2_subi: regs[op_r2] = regs[op_r2] - op_imm4;
-							
-							`s2_undefined: pc = pc +2;
+									//`s2_write16: ram[regs[op_r3]] = regs[op_r2];
+									`s2_addi: regs[op_r2] = regs[op_r2] + op_imm4;
+									`s2_subi: regs[op_r2] = regs[op_r2] - op_imm4;
+									
+									`s2_undefined: pc = pc +2;
+								endcase
+							end
+							`s1_ext_s3: pc = pc +2;
 						endcase
 					end
-					`s1_ext_s3: pc = pc +2;
-				endcase
-			end
+				end
+				`state_memaccess:
+				begin
+				end
+			endcase
+			
 			LED  = & regs[0];
 		end
 	end
