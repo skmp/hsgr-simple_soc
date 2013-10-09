@@ -219,7 +219,7 @@ namespace SoC
             SaveFileDialog sfd = new SaveFileDialog();
 
             //ofdLoad.InitialDirectory = "c:\\";
-            sfd.Filter = "mif files (*.mif)|*.mif";
+            sfd.Filter = "coe files (*.coe)|*.coe|mif files (*.mif)|*.mif";
             sfd.FilterIndex = 1;
             sfd.RestoreDirectory = true;
 
@@ -227,26 +227,10 @@ namespace SoC
             {
                 if ((fileStream = sfd.OpenFile()) != null)
                 {
-                    using (fileStream)
-                    {
-                        using (StreamWriter writer = new StreamWriter(fileStream))
-                        {
-                            writer.WriteLine("DEPTH = 8192");
-                            writer.WriteLine("WIDTH = 16");
-                            writer.WriteLine("ADDRESS_RADIX = HEX");
-                            writer.WriteLine("DATA_RADIX = HEX");
-                            writer.WriteLine("CONTENT");
-                            writer.WriteLine("BEGIN");
-                            writer.Write("0 : ");
-                            int len = 8192;
-                            for (int addr = 0; addr < len; addr++)
-                            {
-                                writer.Write(Memory[addr].ToString("X") + " ");
-                            }
-                            writer.WriteLine(";");
-                            writer.WriteLine("END");
-                        }
-                    }
+                    if (sfd.FileName.ToLower().EndsWith("mif"))
+                        exportMifFile(fileStream);
+                    else
+                        exportCoeFile(fileStream);
                 }
                 else
                     throw new Exception("Cannot open bin file. [" + sfd.FileName + "]");
@@ -473,6 +457,50 @@ namespace SoC
             }
 
             return binary;
+        }
+        #endregion
+        #region private void exportMifFile(Stream fileStream)
+        private void exportMifFile(Stream fileStream)
+        {
+            using (fileStream)
+            {
+                using (StreamWriter writer = new StreamWriter(fileStream))
+                {
+                    writer.WriteLine("DEPTH = 8192");
+                    writer.WriteLine("WIDTH = 16");
+                    writer.WriteLine("ADDRESS_RADIX = HEX");
+                    writer.WriteLine("DATA_RADIX = HEX");
+                    writer.WriteLine("CONTENT");
+                    writer.WriteLine("BEGIN");
+                    writer.Write("0 : ");
+                    int len = 8192;
+                    for (int addr = 0; addr < len; addr++)
+                    {
+                        writer.Write(Memory[addr].ToString("X") + " ");
+                    }
+                    writer.WriteLine(";");
+                    writer.WriteLine("END");
+                }
+            }
+        }
+        #endregion
+        #region private void exportCoeFile(Stream fileStream)
+        private void exportCoeFile(Stream fileStream)
+        {
+            using (fileStream)
+            {
+                using (StreamWriter writer = new StreamWriter(fileStream))
+                {
+                    writer.WriteLine("MEMORY_INITIALIZATION_RADIX=16;");
+                    writer.WriteLine("MEMORY_INITIALIZATION_VECTOR=");
+                    int len = 8192;
+                    for (int addr = 0; addr < len-1; addr++)
+                    {
+                        writer.WriteLine(Memory[addr].ToString("X") + ",");
+                    }
+                    writer.WriteLine(Memory[len-1].ToString("X") + ";");
+                }
+            }
         }
         #endregion
     }
