@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstdint>
+#include "core.h"
 
 #pragma comment(lib, "SDL.lib")
 
@@ -12,8 +13,6 @@ int main(int argc, char *argv[]) {
 
 typedef uint16_t u16;
 typedef int16_t s16;
-
-extern u16 vga[320*240];
 
 void runframe();
 void loadfile(FILE* f);
@@ -121,7 +120,7 @@ int realmain() {
 	SDL_SetModuleHandle(GetModuleHandle(NULL));
 
     /* Set a video mode */
-	SDL_Surface* screen = SDL_SetVideoMode( 640, 480, 0, 0 );
+	SDL_Surface* screen = SDL_SetVideoMode( HSIZE*2, VSIZE*2, 0, 0 );
 
     if( !screen ){
         fprintf( stderr, "Could not set video mode: %s\n", SDL_GetError() );
@@ -159,12 +158,12 @@ int realmain() {
 
 		runframe();
 
-		for (int y = 0; y<240; y++) {
-			for (int x = 0; x<320; x++) {
-				put_pixel32(screen, x*2 + 0, y*2 + 0, CLUT[7&vga[y*320 + x]]);
-				put_pixel32(screen, x*2 + 0, y*2 + 1, CLUT[7&vga[y*320 + x]]);
-				put_pixel32(screen, x*2 + 1, y*2 + 0, CLUT[7&vga[y*320 + x]]);
-				put_pixel32(screen, x*2 + 1, y*2 + 1, CLUT[7&vga[y*320 + x]]);
+		for (int y = 0; y<VSIZE; y++) {
+			for (int x = 0; x<HSIZE; x++) {
+				put_pixel32(screen, x*2 + 0, y*2 + 0, CLUT[7&vga[y*HSIZE + x]]);
+				put_pixel32(screen, x*2 + 0, y*2 + 1, CLUT[7&vga[y*HSIZE + x]]);
+				put_pixel32(screen, x*2 + 1, y*2 + 0, CLUT[7&vga[y*HSIZE + x]]);
+				put_pixel32(screen, x*2 + 1, y*2 + 1, CLUT[7&vga[y*HSIZE + x]]);
 			}
 		}
 

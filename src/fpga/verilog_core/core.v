@@ -19,6 +19,14 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 
+`define VGA_HSIZE 640
+`define VGA_VSIZE 480
+
+`define HSIZE 256
+`define VSIZE 256
+
+`define VGA_PIXELS (VGA_VSIZE * VGA_HSIZE)
+`define PIXELS (VSIZE * HSIZE)
 
 module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G, I_SW);
 
@@ -171,8 +179,7 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 			vram_we = 0;
 			vram_address = 0;
 			vram_in = 0;
-	
-	
+
 			//LED = 4;
 		end
 		else
@@ -215,7 +222,7 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 							`s1_draw:
 							begin
 								state=`state_vram_write;
-								vram_address = regs[op_r2]* 320 + regs[op_r1];
+								vram_address = regs[op_r2]* `HSIZE + regs[op_r1];
 								vram_in = regs[op_r3];
 								vram_we = 1;
 							end
@@ -296,10 +303,7 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 					state = `state_fetch;
 					vram_we=0;
 				end
-				
 			endcase
-			
-			//LED  = & regs[0];
 		end
 	end
 
@@ -314,13 +318,23 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 	reg [9:0] pixel; //current pixel, 0 to 831
 	reg [9:0] line;  //current line, 0 to 519
 	
-	wire in_rgb;
-	
 	//continuous assignment
 	//the moment pixel changes in_rgb is "instantly" updated
-	assign in_rgb = (pixel < 640) && (line < 480);
+	wire in_rgb = (pixel < 640) && (line < 480);
+	
+	`define LINE_TOP		( (`VGA_VSIZE-`VSIZE)/2 )
+	`define LINE_BOTTOM	( `LINE_TOP + `VSIZE )
+	
+	`define PIXEL_LEFT	( (`VGA_HSIZE-`HSIZE)/2 )
+	`define PIXEL_RIGHT	( `PIXEL_LEFT + `HSIZE )
+	
+	wire in_window =	line >= `LINE_TOP && line < `LINE_BOTTOM && 
+							pixel >= `PIXEL_LEFT && pixel < `PIXEL_RIGHT;
+							
+	assign vram_addrb = in_window ? ( (line-`LINE_TOP) * `HSIZE + (pixel-`PIXEL_LEFT) ) : 0;
 	
 	reg sw;
+	
 	//Input switch latch, to avoid flicker
 	//this guarantees that the sw value does not change mid-frame
 	always@ (posedge CLK)
@@ -361,19 +375,31 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 		O_HSYNC = (pixel >= 664 && pixel <= 703) ? 0 : 1;
 		O_VSYNC = (line >= 489 && line <= 490) ? 0 : 1;
 		
-		//Generate a pseudo random image, or a solid filled image, or a mix
-		//depending on the sw inputs
-		O_VIDEO_R = {4{in_rgb&vram_doutb[0]}};//{4{in_rgb}} & ((pixel ^ (line >> 0)) & ~{4{sw[3]}} | {4{sw[0]}});
-		O_VIDEO_B = {4{in_rgb&vram_doutb[1]}};//{4{in_rgb}} & ((pixel ^ (line >> 2)) & ~{4{sw[3]}} | {4{sw[1]}});
-		O_VIDEO_G = {4{in_rgb&vram_doutb[2]}};//{4{in_rgb}} & ((pixel ^ (line >> 4)) & ~{4{sw[3]}} | {4{sw[2]}});
+		if (in_rgb)
+		begin
+			if (in_window)
+			begin
+				O_VIDEO_R = /*vram_addrb[15:12]^*/{4{vram_doutb[0]}};
+				O_VIDEO_B = /*vram_addrb[11:8]^*/{4{vram_doutb[1]}};
+				O_VIDEO_G = /*vram_addrb[7:4]^*/{4{vram_doutb[2]}};		
+			end
+			else
+			begin
+				O_VIDEO_R = 3 ^ sw;
+				O_VIDEO_B = 3 ^ sw;
+				O_VIDEO_G = 3 ^ sw;
+			end
+		end
+		else
+		begin
+			O_VIDEO_R = 0;
+			O_VIDEO_B = 0;
+			O_VIDEO_G = 0;
+		end
 		
 		//Make the leds follow the SW and light up if reset
 		LED = I_SW ^ {4{I_RESET}};
 	end
-	
-	assign vram_addrb = (line * 320 + pixel-1) > (320*240-1) ? 0 : (line * 320 + pixel-1) ;
-	
-	
 
 endmodule
 

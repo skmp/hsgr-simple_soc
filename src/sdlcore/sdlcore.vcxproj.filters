@@ -4,4 +4,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="core.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="core.h" />
+  </ItemGroup>
 </Project>

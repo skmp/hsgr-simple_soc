@@ -2,11 +2,7 @@
 #include <stdlib.h>
 #include <cstdint>
 
-typedef uint16_t u16;
-typedef int16_t s16;
-
-#define MEM_SIZE 8192
-#define MEM_MASK (MEM_SIZE - 1)
+#include "core.h"
 
 union opcode_t {
 	u16 data;
@@ -86,9 +82,8 @@ enum s3_codes {
 	s3_wait,
 };
 
-
 u16 mem[MEM_SIZE];
-u16 vga[320*240];
+u16 vga[SCREEN_PIXELS];
 
 u16 readm(u16 addr) {
 	return mem[addr & MEM_MASK];
@@ -125,7 +120,7 @@ bool runop()
 	else
 	{
 		switch(op.s1) {
-		case s1_draw:	vga[r[op.p_r2]*320 + r[op.p_r1]] = r[op.p_r3]; break;
+		case s1_draw:	vga[(r[op.p_r2]*HSIZE + r[op.p_r1]) % SCREEN_PIXELS] = r[op.p_r3]; break;
 
 		case s1_movh:	r[op.p_r1] = (r[op.p_r1] & 0xFF) | (op.imm8<<8);  break;
 
