@@ -1,6 +1,5 @@
               ORG 0x0000
 
-	      j start
 	      
 	      LI r0, 0
 	      LI r1, 1
@@ -10,8 +9,10 @@
 	      LI r12, 100   ; Y coordinate
 
 s1	      LI r10, mario_left_1
-	      LI r13, s2    ; return address
+	      LI r13, delay    ; return address
 	      j draw_sprite  
+
+delay	      j delay
 	      
 s2	      WAIT 0
               LI r10, mario_left_2
