@@ -93,14 +93,14 @@ void put_pixel32( SDL_Surface *surface, int x, int y, Uint32 pixel )
 uint32_t CLUT[8]= {
 	0xFF000000,			//black
 	0xFFFF0000,			//red
-	0xFFD3D3D3,			//lightgray
+	0xFF00FF00,			//blue
 
-	0xFF00008B,			//dark blue
-	0xFFFF0000,			//red
-	0xFF000F0,			//red
+	0xFFFF00FF,			//red+blue
+	0xFF00FF00,			//green
+	0xFFFFFF00,			//green + red
 
-	0xFFFD0F0,			//red
-	0x00FD0F0,			//red
+	0xFF0FFFFF,			//green + blue
+	0xFFFFFFFF,			//green + red + blue
 };
 
 
