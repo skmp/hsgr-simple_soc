@@ -4,7 +4,11 @@
 	      LI r1, 1
 	      LI r2, 100
 	      
-	      LI r11, 100   ; X coordinate
+	      
+start	      LI r13, bs1
+	      J blank_screen
+
+bs1	      LI r11, 100   ; X coordinate
 	      LI r12, 100   ; Y coordinate
 
 s1	      LI r10, mario_left_1
@@ -26,7 +30,7 @@ s4            WAIT 0
 
 
 	      
-start         LI r0, 0x8    ; 8    max_color
+start2        LI r0, 0x8    ; 8    max_color
               LI r1, 0xc7   ; 200  max_pixel   
               LI r2, 0x1    
               LI r3, 0x0    ; X
@@ -65,6 +69,49 @@ zero_color    MOVL r5, 0
 ;
 ;
 ;
+	      
+; r5 holds the color
+; r13 return address
+; r14 temp var
+; r15 temp var
+;
+blank_screen_return_address DW 0 ; this memory location holds the return address for the blank screen sub-routine
+
+blank_screen  li r15, bs_start
+              j save_reg
+
+bs_start      LI r1, 0xc7
+	      LI r3, 0
+	      LI r4, 0
+              LI r5, 0x0
+	      
+              li r15, blank_screen_return_address
+              write_16, r13, r15  ; return address saved	     
+
+bs_set_pixel  MOV r6, r5
+              DRAW r3, r4, r6
+              	      
+              ; walk through the columns of the row
+	      ADD r3, r2   ; X = X+1
+              BGT r3, r1, bs_next_row
+              J bs_set_pixel
+
+bs_next_row   MOVL r3, 0   ; X = 0
+              ADD r4, r2   ; Y = Y + 1
+              BGT r4, r1, bs_finish
+              J bs_set_pixel
+	 
+bs_finish     WAIT 0
+              li r15, bs_return
+              j load_reg
+
+bs_return     li  r15, blank_screen_return_address
+              read_16 r13, r15
+              JR r13      ; return
+
+
+
+
 ; r10 holds the sprite to be drawn
 ; r11 holds the X coordinate
 ; r12 holds the Y coordinate
