@@ -1,4 +1,4 @@
-﻿namespace SoC
+﻿namespace SoC.Emulator
 {
     partial class EmulatorDisplay
     {

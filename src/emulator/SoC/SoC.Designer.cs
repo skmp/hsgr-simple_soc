@@ -38,7 +38,7 @@
             this.colHError = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tctMain = new System.Windows.Forms.TabControl();
             this.tbpSource = new System.Windows.Forms.TabPage();
-            this.tbpEmulator = new System.Windows.Forms.TabPage();
+            this.tbpDevice = new System.Windows.Forms.TabPage();
             this.chkMemoryDisplay = new System.Windows.Forms.CheckBox();
             this.chkRegisterDisplay = new System.Windows.Forms.CheckBox();
             this.chkBinaryDisplay = new System.Windows.Forms.CheckBox();
@@ -50,21 +50,29 @@
             this.colHRegName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colHRegValue = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.grpActions = new System.Windows.Forms.GroupBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.btnLoad = new System.Windows.Forms.Button();
+            this.btnExport = new System.Windows.Forms.Button();
+            this.btnSave = new System.Windows.Forms.Button();
             this.grpUtils = new System.Windows.Forms.GroupBox();
             this.btnSpriteCalculator = new System.Windows.Forms.Button();
-            this.btnSave = new System.Windows.Forms.Button();
-            this.btnExport = new System.Windows.Forms.Button();
             this.grpDebug = new System.Windows.Forms.GroupBox();
-            this.btnDebugBreak = new System.Windows.Forms.Button();
-            this.btnDebugRun = new System.Windows.Forms.Button();
-            this.btnDebugDisplay = new System.Windows.Forms.Button();
-            this.btnDebugStep = new System.Windows.Forms.Button();
-            this.btnDebugReset = new System.Windows.Forms.Button();
-            this.btnLoad = new System.Windows.Forms.Button();
+            this.btnDeviceUpload = new System.Windows.Forms.Button();
+            this.btnDeviceDisconnect = new System.Windows.Forms.Button();
+            this.btnDeviceConnect = new System.Windows.Forms.Button();
+            this.btnDeviceConfigure = new System.Windows.Forms.Button();
+            this.btnDeviceReadAll = new System.Windows.Forms.Button();
+            this.cmbDevices = new System.Windows.Forms.ComboBox();
+            this.btnDeviceHalt = new System.Windows.Forms.Button();
+            this.btnDeviceResume = new System.Windows.Forms.Button();
+            this.btnDeviceDisplay = new System.Windows.Forms.Button();
+            this.btnDeviceStep = new System.Windows.Forms.Button();
+            this.btnDeviceReset = new System.Windows.Forms.Button();
             this.tctMain.SuspendLayout();
             this.tbpSource.SuspendLayout();
-            this.tbpEmulator.SuspendLayout();
+            this.tbpDevice.SuspendLayout();
             this.grpActions.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.grpUtils.SuspendLayout();
             this.grpDebug.SuspendLayout();
             this.SuspendLayout();
@@ -83,7 +91,7 @@
             // 
             // btnAssemble
             // 
-            this.btnAssemble.Location = new System.Drawing.Point(25, 57);
+            this.btnAssemble.Location = new System.Drawing.Point(19, 48);
             this.btnAssemble.Name = "btnAssemble";
             this.btnAssemble.Size = new System.Drawing.Size(75, 23);
             this.btnAssemble.TabIndex = 1;
@@ -128,7 +136,7 @@
             // tctMain
             // 
             this.tctMain.Controls.Add(this.tbpSource);
-            this.tctMain.Controls.Add(this.tbpEmulator);
+            this.tctMain.Controls.Add(this.tbpDevice);
             this.tctMain.Location = new System.Drawing.Point(144, 14);
             this.tctMain.Name = "tctMain";
             this.tctMain.SelectedIndex = 0;
@@ -147,22 +155,22 @@
             this.tbpSource.Text = "Source";
             this.tbpSource.UseVisualStyleBackColor = true;
             // 
-            // tbpEmulator
+            // tbpDevice
             // 
-            this.tbpEmulator.Controls.Add(this.chkMemoryDisplay);
-            this.tbpEmulator.Controls.Add(this.chkRegisterDisplay);
-            this.tbpEmulator.Controls.Add(this.chkBinaryDisplay);
-            this.tbpEmulator.Controls.Add(this.lblProgramCounter);
-            this.tbpEmulator.Controls.Add(this.lstMemory);
-            this.tbpEmulator.Controls.Add(this.lstRegister);
-            this.tbpEmulator.Controls.Add(this.lstBinary);
-            this.tbpEmulator.Location = new System.Drawing.Point(4, 22);
-            this.tbpEmulator.Name = "tbpEmulator";
-            this.tbpEmulator.Padding = new System.Windows.Forms.Padding(3);
-            this.tbpEmulator.Size = new System.Drawing.Size(735, 496);
-            this.tbpEmulator.TabIndex = 1;
-            this.tbpEmulator.Text = "Emulator";
-            this.tbpEmulator.UseVisualStyleBackColor = true;
+            this.tbpDevice.Controls.Add(this.chkMemoryDisplay);
+            this.tbpDevice.Controls.Add(this.chkRegisterDisplay);
+            this.tbpDevice.Controls.Add(this.chkBinaryDisplay);
+            this.tbpDevice.Controls.Add(this.lblProgramCounter);
+            this.tbpDevice.Controls.Add(this.lstMemory);
+            this.tbpDevice.Controls.Add(this.lstRegister);
+            this.tbpDevice.Controls.Add(this.lstBinary);
+            this.tbpDevice.Location = new System.Drawing.Point(4, 22);
+            this.tbpDevice.Name = "tbpDevice";
+            this.tbpDevice.Padding = new System.Windows.Forms.Padding(3);
+            this.tbpDevice.Size = new System.Drawing.Size(735, 496);
+            this.tbpDevice.TabIndex = 1;
+            this.tbpDevice.Text = "Emulator";
+            this.tbpDevice.UseVisualStyleBackColor = true;
             // 
             // chkMemoryDisplay
             // 
@@ -254,126 +262,32 @@
             // 
             // grpActions
             // 
+            this.grpActions.Controls.Add(this.groupBox1);
             this.grpActions.Controls.Add(this.grpUtils);
-            this.grpActions.Controls.Add(this.btnSave);
-            this.grpActions.Controls.Add(this.btnExport);
             this.grpActions.Controls.Add(this.grpDebug);
-            this.grpActions.Controls.Add(this.btnLoad);
-            this.grpActions.Controls.Add(this.btnAssemble);
             this.grpActions.Location = new System.Drawing.Point(13, 13);
             this.grpActions.Name = "grpActions";
-            this.grpActions.Size = new System.Drawing.Size(125, 523);
+            this.grpActions.Size = new System.Drawing.Size(125, 666);
             this.grpActions.TabIndex = 5;
             this.grpActions.TabStop = false;
             this.grpActions.Text = "Actions";
             // 
-            // grpUtils
+            // groupBox1
             // 
-            this.grpUtils.Controls.Add(this.btnSpriteCalculator);
-            this.grpUtils.Location = new System.Drawing.Point(7, 376);
-            this.grpUtils.Name = "grpUtils";
-            this.grpUtils.Size = new System.Drawing.Size(112, 137);
-            this.grpUtils.TabIndex = 7;
-            this.grpUtils.TabStop = false;
-            this.grpUtils.Text = "Utils";
-            // 
-            // btnSpriteCalculator
-            // 
-            this.btnSpriteCalculator.Location = new System.Drawing.Point(19, 34);
-            this.btnSpriteCalculator.Name = "btnSpriteCalculator";
-            this.btnSpriteCalculator.Size = new System.Drawing.Size(75, 23);
-            this.btnSpriteCalculator.TabIndex = 6;
-            this.btnSpriteCalculator.Text = "Sprite Calc";
-            this.btnSpriteCalculator.UseVisualStyleBackColor = true;
-            this.btnSpriteCalculator.Click += new System.EventHandler(this.btnSpriteCalculator_Click);
-            // 
-            // btnSave
-            // 
-            this.btnSave.Location = new System.Drawing.Point(25, 86);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(75, 23);
-            this.btnSave.TabIndex = 5;
-            this.btnSave.Text = "Save";
-            this.btnSave.UseVisualStyleBackColor = true;
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
-            // 
-            // btnExport
-            // 
-            this.btnExport.Location = new System.Drawing.Point(25, 115);
-            this.btnExport.Name = "btnExport";
-            this.btnExport.Size = new System.Drawing.Size(75, 23);
-            this.btnExport.TabIndex = 4;
-            this.btnExport.Text = "Export";
-            this.btnExport.UseVisualStyleBackColor = true;
-            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
-            // 
-            // grpDebug
-            // 
-            this.grpDebug.Controls.Add(this.btnDebugBreak);
-            this.grpDebug.Controls.Add(this.btnDebugRun);
-            this.grpDebug.Controls.Add(this.btnDebugDisplay);
-            this.grpDebug.Controls.Add(this.btnDebugStep);
-            this.grpDebug.Controls.Add(this.btnDebugReset);
-            this.grpDebug.Location = new System.Drawing.Point(7, 175);
-            this.grpDebug.Name = "grpDebug";
-            this.grpDebug.Size = new System.Drawing.Size(112, 194);
-            this.grpDebug.TabIndex = 3;
-            this.grpDebug.TabStop = false;
-            this.grpDebug.Text = "Debug";
-            // 
-            // btnDebugBreak
-            // 
-            this.btnDebugBreak.Location = new System.Drawing.Point(19, 106);
-            this.btnDebugBreak.Name = "btnDebugBreak";
-            this.btnDebugBreak.Size = new System.Drawing.Size(75, 23);
-            this.btnDebugBreak.TabIndex = 8;
-            this.btnDebugBreak.Text = "Break";
-            this.btnDebugBreak.UseVisualStyleBackColor = true;
-            this.btnDebugBreak.Click += new System.EventHandler(this.btnDebugBreak_Click);
-            // 
-            // btnDebugRun
-            // 
-            this.btnDebugRun.Location = new System.Drawing.Point(19, 77);
-            this.btnDebugRun.Name = "btnDebugRun";
-            this.btnDebugRun.Size = new System.Drawing.Size(75, 23);
-            this.btnDebugRun.TabIndex = 7;
-            this.btnDebugRun.Text = "Run";
-            this.btnDebugRun.UseVisualStyleBackColor = true;
-            this.btnDebugRun.Click += new System.EventHandler(this.btnDebugRun_Click);
-            // 
-            // btnDebugDisplay
-            // 
-            this.btnDebugDisplay.Location = new System.Drawing.Point(19, 165);
-            this.btnDebugDisplay.Name = "btnDebugDisplay";
-            this.btnDebugDisplay.Size = new System.Drawing.Size(75, 23);
-            this.btnDebugDisplay.TabIndex = 6;
-            this.btnDebugDisplay.Text = "Display";
-            this.btnDebugDisplay.UseVisualStyleBackColor = true;
-            this.btnDebugDisplay.Click += new System.EventHandler(this.btnDebugDisplay_Click);
-            // 
-            // btnDebugStep
-            // 
-            this.btnDebugStep.Location = new System.Drawing.Point(19, 48);
-            this.btnDebugStep.Name = "btnDebugStep";
-            this.btnDebugStep.Size = new System.Drawing.Size(75, 23);
-            this.btnDebugStep.TabIndex = 5;
-            this.btnDebugStep.Text = "Step";
-            this.btnDebugStep.UseVisualStyleBackColor = true;
-            this.btnDebugStep.Click += new System.EventHandler(this.btnDebugStep_Click);
-            // 
-            // btnDebugReset
-            // 
-            this.btnDebugReset.Location = new System.Drawing.Point(19, 19);
-            this.btnDebugReset.Name = "btnDebugReset";
-            this.btnDebugReset.Size = new System.Drawing.Size(75, 23);
-            this.btnDebugReset.TabIndex = 4;
-            this.btnDebugReset.Text = "Reset";
-            this.btnDebugReset.UseVisualStyleBackColor = true;
-            this.btnDebugReset.Click += new System.EventHandler(this.btnDebugReset_Click);
+            this.groupBox1.Controls.Add(this.btnLoad);
+            this.groupBox1.Controls.Add(this.btnAssemble);
+            this.groupBox1.Controls.Add(this.btnExport);
+            this.groupBox1.Controls.Add(this.btnSave);
+            this.groupBox1.Location = new System.Drawing.Point(7, 29);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(112, 138);
+            this.groupBox1.TabIndex = 12;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Assembler";
             // 
             // btnLoad
             // 
-            this.btnLoad.Location = new System.Drawing.Point(25, 28);
+            this.btnLoad.Location = new System.Drawing.Point(19, 19);
             this.btnLoad.Name = "btnLoad";
             this.btnLoad.Size = new System.Drawing.Size(75, 23);
             this.btnLoad.TabIndex = 2;
@@ -381,11 +295,189 @@
             this.btnLoad.UseVisualStyleBackColor = true;
             this.btnLoad.Click += new System.EventHandler(this.btnLoad_Click);
             // 
+            // btnExport
+            // 
+            this.btnExport.Location = new System.Drawing.Point(19, 106);
+            this.btnExport.Name = "btnExport";
+            this.btnExport.Size = new System.Drawing.Size(75, 23);
+            this.btnExport.TabIndex = 4;
+            this.btnExport.Text = "Export";
+            this.btnExport.UseVisualStyleBackColor = true;
+            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
+            // 
+            // btnSave
+            // 
+            this.btnSave.Location = new System.Drawing.Point(19, 77);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(75, 23);
+            this.btnSave.TabIndex = 5;
+            this.btnSave.Text = "Save";
+            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            // 
+            // grpUtils
+            // 
+            this.grpUtils.Controls.Add(this.btnSpriteCalculator);
+            this.grpUtils.Location = new System.Drawing.Point(7, 602);
+            this.grpUtils.Name = "grpUtils";
+            this.grpUtils.Size = new System.Drawing.Size(112, 58);
+            this.grpUtils.TabIndex = 7;
+            this.grpUtils.TabStop = false;
+            this.grpUtils.Text = "Utils";
+            // 
+            // btnSpriteCalculator
+            // 
+            this.btnSpriteCalculator.Location = new System.Drawing.Point(19, 19);
+            this.btnSpriteCalculator.Name = "btnSpriteCalculator";
+            this.btnSpriteCalculator.Size = new System.Drawing.Size(75, 23);
+            this.btnSpriteCalculator.TabIndex = 6;
+            this.btnSpriteCalculator.Text = "Sprite Calc";
+            this.btnSpriteCalculator.UseVisualStyleBackColor = true;
+            this.btnSpriteCalculator.Click += new System.EventHandler(this.btnSpriteCalculator_Click);
+            // 
+            // grpDebug
+            // 
+            this.grpDebug.Controls.Add(this.btnDeviceUpload);
+            this.grpDebug.Controls.Add(this.btnDeviceDisconnect);
+            this.grpDebug.Controls.Add(this.btnDeviceConnect);
+            this.grpDebug.Controls.Add(this.btnDeviceConfigure);
+            this.grpDebug.Controls.Add(this.btnDeviceReadAll);
+            this.grpDebug.Controls.Add(this.cmbDevices);
+            this.grpDebug.Controls.Add(this.btnDeviceHalt);
+            this.grpDebug.Controls.Add(this.btnDeviceResume);
+            this.grpDebug.Controls.Add(this.btnDeviceDisplay);
+            this.grpDebug.Controls.Add(this.btnDeviceStep);
+            this.grpDebug.Controls.Add(this.btnDeviceReset);
+            this.grpDebug.Location = new System.Drawing.Point(7, 191);
+            this.grpDebug.Name = "grpDebug";
+            this.grpDebug.Size = new System.Drawing.Size(112, 405);
+            this.grpDebug.TabIndex = 3;
+            this.grpDebug.TabStop = false;
+            this.grpDebug.Text = "Device";
+            // 
+            // btnDeviceUpload
+            // 
+            this.btnDeviceUpload.Enabled = false;
+            this.btnDeviceUpload.Location = new System.Drawing.Point(19, 292);
+            this.btnDeviceUpload.Name = "btnDeviceUpload";
+            this.btnDeviceUpload.Size = new System.Drawing.Size(75, 23);
+            this.btnDeviceUpload.TabIndex = 14;
+            this.btnDeviceUpload.Text = "Upload";
+            this.btnDeviceUpload.UseVisualStyleBackColor = true;
+            this.btnDeviceUpload.Click += new System.EventHandler(this.btnDeviceUpload_Click);
+            // 
+            // btnDeviceDisconnect
+            // 
+            this.btnDeviceDisconnect.Enabled = false;
+            this.btnDeviceDisconnect.Location = new System.Drawing.Point(19, 105);
+            this.btnDeviceDisconnect.Name = "btnDeviceDisconnect";
+            this.btnDeviceDisconnect.Size = new System.Drawing.Size(75, 23);
+            this.btnDeviceDisconnect.TabIndex = 13;
+            this.btnDeviceDisconnect.Text = "Disconnect";
+            this.btnDeviceDisconnect.UseVisualStyleBackColor = true;
+            this.btnDeviceDisconnect.Click += new System.EventHandler(this.btnDeviceDisconnect_Click);
+            // 
+            // btnDeviceConnect
+            // 
+            this.btnDeviceConnect.Location = new System.Drawing.Point(19, 76);
+            this.btnDeviceConnect.Name = "btnDeviceConnect";
+            this.btnDeviceConnect.Size = new System.Drawing.Size(75, 23);
+            this.btnDeviceConnect.TabIndex = 12;
+            this.btnDeviceConnect.Text = "Connect";
+            this.btnDeviceConnect.UseVisualStyleBackColor = true;
+            this.btnDeviceConnect.Click += new System.EventHandler(this.btnDeviceConnect_Click);
+            // 
+            // btnDeviceConfigure
+            // 
+            this.btnDeviceConfigure.Location = new System.Drawing.Point(19, 47);
+            this.btnDeviceConfigure.Name = "btnDeviceConfigure";
+            this.btnDeviceConfigure.Size = new System.Drawing.Size(75, 23);
+            this.btnDeviceConfigure.TabIndex = 11;
+            this.btnDeviceConfigure.Text = "Configure";
+            this.btnDeviceConfigure.UseVisualStyleBackColor = true;
+            this.btnDeviceConfigure.Click += new System.EventHandler(this.btnDeviceConfigure_Click);
+            // 
+            // btnDeviceReadAll
+            // 
+            this.btnDeviceReadAll.Enabled = false;
+            this.btnDeviceReadAll.Location = new System.Drawing.Point(19, 321);
+            this.btnDeviceReadAll.Name = "btnDeviceReadAll";
+            this.btnDeviceReadAll.Size = new System.Drawing.Size(75, 23);
+            this.btnDeviceReadAll.TabIndex = 10;
+            this.btnDeviceReadAll.Text = "Read All";
+            this.btnDeviceReadAll.UseVisualStyleBackColor = true;
+            this.btnDeviceReadAll.Click += new System.EventHandler(this.btnDeviceReadAll_Click);
+            // 
+            // cmbDevices
+            // 
+            this.cmbDevices.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbDevices.FormattingEnabled = true;
+            this.cmbDevices.Location = new System.Drawing.Point(19, 20);
+            this.cmbDevices.Name = "cmbDevices";
+            this.cmbDevices.Size = new System.Drawing.Size(75, 21);
+            this.cmbDevices.TabIndex = 9;
+            this.cmbDevices.SelectedIndexChanged += new System.EventHandler(this.cmbDevices_SelectedIndexChanged);
+            // 
+            // btnDeviceHalt
+            // 
+            this.btnDeviceHalt.Enabled = false;
+            this.btnDeviceHalt.Location = new System.Drawing.Point(19, 185);
+            this.btnDeviceHalt.Name = "btnDeviceHalt";
+            this.btnDeviceHalt.Size = new System.Drawing.Size(75, 23);
+            this.btnDeviceHalt.TabIndex = 8;
+            this.btnDeviceHalt.Text = "Halt";
+            this.btnDeviceHalt.UseVisualStyleBackColor = true;
+            this.btnDeviceHalt.Click += new System.EventHandler(this.btnDeviceHalt_Click);
+            // 
+            // btnDeviceResume
+            // 
+            this.btnDeviceResume.Enabled = false;
+            this.btnDeviceResume.Location = new System.Drawing.Point(19, 214);
+            this.btnDeviceResume.Name = "btnDeviceResume";
+            this.btnDeviceResume.Size = new System.Drawing.Size(75, 23);
+            this.btnDeviceResume.TabIndex = 7;
+            this.btnDeviceResume.Text = "Resume";
+            this.btnDeviceResume.UseVisualStyleBackColor = true;
+            this.btnDeviceResume.Click += new System.EventHandler(this.btnDeviceResume_Click);
+            // 
+            // btnDeviceDisplay
+            // 
+            this.btnDeviceDisplay.Enabled = false;
+            this.btnDeviceDisplay.Location = new System.Drawing.Point(19, 376);
+            this.btnDeviceDisplay.Name = "btnDeviceDisplay";
+            this.btnDeviceDisplay.Size = new System.Drawing.Size(75, 23);
+            this.btnDeviceDisplay.TabIndex = 6;
+            this.btnDeviceDisplay.Text = "Display";
+            this.btnDeviceDisplay.UseVisualStyleBackColor = true;
+            this.btnDeviceDisplay.Click += new System.EventHandler(this.btnDeviceDisplay_Click);
+            // 
+            // btnDeviceStep
+            // 
+            this.btnDeviceStep.Enabled = false;
+            this.btnDeviceStep.Location = new System.Drawing.Point(19, 243);
+            this.btnDeviceStep.Name = "btnDeviceStep";
+            this.btnDeviceStep.Size = new System.Drawing.Size(75, 23);
+            this.btnDeviceStep.TabIndex = 5;
+            this.btnDeviceStep.Text = "Step";
+            this.btnDeviceStep.UseVisualStyleBackColor = true;
+            this.btnDeviceStep.Click += new System.EventHandler(this.btnDeviceStep_Click);
+            // 
+            // btnDeviceReset
+            // 
+            this.btnDeviceReset.Enabled = false;
+            this.btnDeviceReset.Location = new System.Drawing.Point(19, 156);
+            this.btnDeviceReset.Name = "btnDeviceReset";
+            this.btnDeviceReset.Size = new System.Drawing.Size(75, 23);
+            this.btnDeviceReset.TabIndex = 4;
+            this.btnDeviceReset.Text = "Reset";
+            this.btnDeviceReset.UseVisualStyleBackColor = true;
+            this.btnDeviceReset.Click += new System.EventHandler(this.btnDeviceReset_Click);
+            // 
             // SoC
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(899, 571);
+            this.ClientSize = new System.Drawing.Size(903, 691);
             this.Controls.Add(this.grpActions);
             this.Controls.Add(this.tctMain);
             this.Name = "SoC";
@@ -396,9 +488,10 @@
             this.tctMain.ResumeLayout(false);
             this.tbpSource.ResumeLayout(false);
             this.tbpSource.PerformLayout();
-            this.tbpEmulator.ResumeLayout(false);
-            this.tbpEmulator.PerformLayout();
+            this.tbpDevice.ResumeLayout(false);
+            this.tbpDevice.PerformLayout();
             this.grpActions.ResumeLayout(false);
+            this.groupBox1.ResumeLayout(false);
             this.grpUtils.ResumeLayout(false);
             this.grpDebug.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -409,36 +502,43 @@
 
         private System.Windows.Forms.TextBox txtCode;
         private System.Windows.Forms.Button btnAssemble;
-        private System.Windows.Forms.ListView lstBinary;
         private System.Windows.Forms.ColumnHeader colHAddress;
         private System.Windows.Forms.ColumnHeader colHOpcode;
         private System.Windows.Forms.ColumnHeader colHLine;
         private System.Windows.Forms.ColumnHeader colHError;
         private System.Windows.Forms.TabControl tctMain;
         private System.Windows.Forms.TabPage tbpSource;
-        private System.Windows.Forms.TabPage tbpEmulator;
+        private System.Windows.Forms.TabPage tbpDevice;
         private System.Windows.Forms.GroupBox grpActions;
         private System.Windows.Forms.Button btnLoad;
         private System.Windows.Forms.GroupBox grpDebug;
-        private System.Windows.Forms.Button btnDebugReset;
-        private System.Windows.Forms.Button btnDebugStep;
+        private System.Windows.Forms.Button btnDeviceReset;
+        private System.Windows.Forms.Button btnDeviceStep;
         private System.Windows.Forms.Button btnExport;
-        private System.Windows.Forms.ListView lstRegister;
         private System.Windows.Forms.ColumnHeader colHRegName;
         private System.Windows.Forms.ColumnHeader colHRegValue;
-        private System.Windows.Forms.Button btnDebugDisplay;
-        private System.Windows.Forms.ListView lstMemory;
+        private System.Windows.Forms.Button btnDeviceDisplay;
         private System.Windows.Forms.ColumnHeader colHMemoryName;
         private System.Windows.Forms.ColumnHeader colHMemoryValue;
-        private System.Windows.Forms.Button btnDebugBreak;
-        private System.Windows.Forms.Button btnDebugRun;
-        private System.Windows.Forms.Label lblProgramCounter;
+        private System.Windows.Forms.Button btnDeviceHalt;
+        private System.Windows.Forms.Button btnDeviceResume;
         private System.Windows.Forms.Button btnSave;
-        private System.Windows.Forms.CheckBox chkBinaryDisplay;
-        private System.Windows.Forms.CheckBox chkMemoryDisplay;
-        private System.Windows.Forms.CheckBox chkRegisterDisplay;
         private System.Windows.Forms.GroupBox grpUtils;
         private System.Windows.Forms.Button btnSpriteCalculator;
+        private System.Windows.Forms.ComboBox cmbDevices;
+        private System.Windows.Forms.Button btnDeviceReadAll;
+        private System.Windows.Forms.Button btnDeviceConfigure;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Button btnDeviceDisconnect;
+        private System.Windows.Forms.Button btnDeviceConnect;
+        private System.Windows.Forms.Button btnDeviceUpload;
+        public System.Windows.Forms.CheckBox chkBinaryDisplay;
+        public System.Windows.Forms.Label lblProgramCounter;
+        public System.Windows.Forms.ListView lstRegister;
+        public System.Windows.Forms.ListView lstMemory;
+        public System.Windows.Forms.CheckBox chkMemoryDisplay;
+        public System.Windows.Forms.CheckBox chkRegisterDisplay;
+        public System.Windows.Forms.ListView lstBinary;
     }
 }
 

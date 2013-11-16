@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 
-namespace SoC.BL.Entities
+namespace SoC.Assembler.Entities
 {
     public class OpcodeDictionary
     {

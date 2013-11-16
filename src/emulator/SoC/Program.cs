@@ -7,6 +7,8 @@ namespace SoC
 {
     static class Program
     {
+        public static SoC MainWindow = null;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -15,7 +17,8 @@ namespace SoC
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new SoC());
+            MainWindow = new SoC();
+            Application.Run(MainWindow);
         }
     }
 }

@@ -4,17 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
-using SoC.BL.Entities;
+using SoC.Assembler.Entities;
 using System.Threading;
-using SoC.BL.Events;
+using SoC.Emulator.Events;
 
-namespace SoC.BL
+namespace SoC.Emulator
 {
     public delegate void DisplayMemoryChangedEventHandler(object o, DisplayMemoryChangedEventArgs e);
     public delegate void RegisterChangedEventHandler(object o, RegisterChangedEventArgs e);
     public delegate void ProgramCounterChangedEventHandler(object o, ProgramCounterChangedEventArgs e);
 
-    public class Emulator
+    public class EmulatorMain
     {
         public event DisplayMemoryChangedEventHandler DisplayMemoryChanged;
         public event RegisterChangedEventHandler RegisterChanged;
@@ -37,7 +37,7 @@ namespace SoC.BL
         }
 
 
-        public Emulator(UInt16[] memory)
+        public EmulatorMain(UInt16[] memory)
         {
             Register = new Register[16];
             for (int i = 0; i < 16; i++)
@@ -45,8 +45,8 @@ namespace SoC.BL
 
             Memory = memory;
 
-            Display = new byte[200, 200];
-            Array.Clear(Display, 0, 200 * 200);
+            Display = new byte[256, 256];
+            Array.Clear(Display, 0, 256 * 256);
 
             UInt16 o;
             Opcode op;
@@ -59,7 +59,7 @@ namespace SoC.BL
             }
         }
 
-        public Emulator(Dictionary<int, Opcode> program)
+        public EmulatorMain(Dictionary<int, Opcode> program)
         {
             Program = program;
             Register = new Register[16];
@@ -69,8 +69,8 @@ namespace SoC.BL
             Memory = new UInt16[16 * 1024]; // 32K memory
             Array.Clear(Memory, 0, 16 * 1024);
 
-            Display = new byte[200, 200];
-            Array.Clear(Display, 0, 200 * 200);
+            Display = new byte[256, 256];
+            Array.Clear(Display, 0, 256 * 256);
 
 
             foreach (int address in program.Keys)
@@ -88,11 +88,12 @@ namespace SoC.BL
 
         // Program
         Dictionary<int, Opcode> Program;
-        bool breakFlag = false;
+        bool breakFlag = true;
 
         public void Reset()
         {
-            breakFlag = false;
+            breakFlag = true;
+            SetProgramCounter(0);
             ProgramCounter = -1;
             SetProgramCounter(0);
             for (int i = 0; i < 16; i++)
@@ -101,7 +102,7 @@ namespace SoC.BL
 
         public void Step()
         {
-            breakFlag = false;
+            breakFlag = true;
 
             Opcode op = Program[ProgramCounter];
 
@@ -226,7 +227,11 @@ namespace SoC.BL
 
         public void Run()
         {
+            if (!breakFlag)
+                return;
+
             breakFlag = false;
+
             while (!breakFlag)
             {
                 Step();

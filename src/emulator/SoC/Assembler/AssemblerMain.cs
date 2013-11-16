@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Collections;
-using SoC.BL.Entities;
+using SoC.Assembler.Entities;
 
 
-namespace SoC.BL
+namespace SoC.Assembler
 {
-    public class Assembler
+    public class AssemblerMain
     {
         #region public static AssemblerOutput Assemble(String source)
         public static AssemblerOutput Assemble(String source)

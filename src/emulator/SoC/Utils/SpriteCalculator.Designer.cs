@@ -1,4 +1,4 @@
-﻿namespace SoC
+﻿namespace SoC.Utils
 {
     partial class SpriteCalculator
     {

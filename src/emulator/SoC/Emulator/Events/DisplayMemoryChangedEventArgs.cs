@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 
-namespace SoC.BL.Events
+namespace SoC.Emulator.Events
 {
     public class DisplayMemoryChangedEventArgs : EventArgs
     {

@@ -35,6 +35,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -46,26 +47,40 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BL\Assembler.cs" />
-    <Compile Include="BL\Emulator.cs" />
-    <Compile Include="BL\Entities\AssemblerOutput.cs" />
-    <Compile Include="EmulatorDisplay.cs">
+    <Compile Include="Assembler\AssemblerMain.cs" />
+    <Compile Include="Device\Emulator\EmulatorDevice.cs" />
+    <Compile Include="Device\IDevice.cs" />
+    <Compile Include="Device\Papilio\PapilioConfiguration.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EmulatorDisplay.Designer.cs">
+    <Compile Include="Device\Papilio\PapilioConfiguration.Designer.cs">
+      <DependentUpon>PapilioConfiguration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Device\Papilio\PapilioDevice.cs" />
+    <Compile Include="Emulator\EmulatorMain.cs" />
+    <Compile Include="Assembler\Entities\AssemblerOutput.cs" />
+    <Compile Include="Emulator\EmulatorDisplay.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Emulator\EmulatorDisplay.Designer.cs">
       <DependentUpon>EmulatorDisplay.cs</DependentUpon>
     </Compile>
-    <Compile Include="BL\Events\DisplayMemoryChangedEventArgs.cs" />
-    <Compile Include="BL\Events\ProgramCounterChangedEventArgs.cs" />
-    <Compile Include="BL\Events\RegisterChangedEventArgs.cs" />
-    <Compile Include="BL\Entities\Command.cs" />
-    <Compile Include="BL\Entities\Line.cs" />
-    <Compile Include="BL\Entities\Opcode.cs" />
-    <Compile Include="BL\Entities\OpcodeDictionary.cs" />
-    <Compile Include="BL\Entities\OpcodeType.cs" />
-    <Compile Include="BL\Entities\Register.cs" />
-    <Compile Include="BL\Entities\RegisterDictionary.cs" />
-    <Compile Include="BL\Entities\RomItem.cs" />
+    <Compile Include="Emulator\Events\DisplayMemoryChangedEventArgs.cs" />
+    <Compile Include="Emulator\Events\ProgramCounterChangedEventArgs.cs" />
+    <Compile Include="Emulator\Events\RegisterChangedEventArgs.cs" />
+    <Compile Include="Assembler\Entities\Command.cs" />
+    <Compile Include="Assembler\Entities\Line.cs" />
+    <Compile Include="Assembler\Entities\Opcode.cs" />
+    <Compile Include="Assembler\Entities\OpcodeDictionary.cs" />
+    <Compile Include="Assembler\Entities\OpcodeType.cs" />
+    <Compile Include="Assembler\Entities\Register.cs" />
+    <Compile Include="Assembler\Entities\RegisterDictionary.cs" />
+    <Compile Include="Assembler\Entities\RomItem.cs" />
+    <Compile Include="Properties\PapilioSettings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>PapilioSettings.settings</DependentUpon>
+    </Compile>
     <Compile Include="SoC.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -74,13 +89,16 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SpriteCalculator.cs">
+    <Compile Include="Utils\SpriteCalculator.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SpriteCalculator.Designer.cs">
+    <Compile Include="Utils\SpriteCalculator.Designer.cs">
       <DependentUpon>SpriteCalculator.cs</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="EmulatorDisplay.resx">
+    <EmbeddedResource Include="Device\Papilio\PapilioConfiguration.resx">
+      <DependentUpon>PapilioConfiguration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Emulator\EmulatorDisplay.resx">
       <DependentUpon>EmulatorDisplay.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SoC.resx">
@@ -95,9 +113,16 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="SpriteCalculator.resx">
+    <EmbeddedResource Include="Utils\SpriteCalculator.resx">
       <DependentUpon>SpriteCalculator.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\PapilioSettings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>PapilioSettings.Designer.cs</LastGenOutput>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -109,15 +134,16 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="artwork\mario_left_1.bmp" />
-    <Content Include="artwork\mario_left_3.bmp" />
-    <Content Include="artwork\mario_right_1.bmp" />
-    <Content Include="artwork\mario_right_2.bmp" />
-    <Content Include="artwork\mario_right_3.bmp" />
-    <Content Include="artwork\donkey_kong_master.bmp" />
-    <Content Include="artwork\mario_left_2.bmp" />
+    <Content Include="Artwork\mario_left_1.bmp" />
+    <Content Include="Artwork\mario_left_3.bmp" />
+    <Content Include="Artwork\mario_right_1.bmp" />
+    <Content Include="Artwork\mario_right_2.bmp" />
+    <Content Include="Artwork\mario_right_3.bmp" />
+    <Content Include="Artwork\donkey_kong_master.bmp" />
+    <Content Include="Artwork\mario_left_2.bmp" />
     <Content Include="Thoughts.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

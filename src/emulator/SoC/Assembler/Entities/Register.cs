@@ -5,7 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
-namespace SoC.BL.Entities
+namespace SoC.Assembler.Entities
 {
     [StructLayout(LayoutKind.Explicit)]
     public struct Value

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using SoC.BL.Entities;
+using SoC.Assembler.Entities;
 
-namespace SoC.BL.Events
+namespace SoC.Emulator.Events
 {
     public class RegisterChangedEventArgs : EventArgs
     {

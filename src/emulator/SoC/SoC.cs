@@ -7,10 +7,15 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using SoC.BL.Entities;
+using SoC.Assembler.Entities;
 using System.Reflection;
-using SoC.BL;
-using SoC.BL.Events;
+using SoC.Assembler;
+using SoC.Emulator;
+using SoC.Emulator.Events;
+using SoC.Utils;
+using System.Configuration;
+using SoC.Device;
+using SoC.Properties;
 
 namespace SoC
 {
@@ -20,6 +25,8 @@ namespace SoC
         {
             InitializeComponent();
         }
+
+        List<IDevice> SoCDevices = new List<IDevice>();
 
         // Event handlers
         #region private void SoC_Load(object sender, EventArgs e)
@@ -31,6 +38,8 @@ namespace SoC
             doubleBufferPropertyInfo.SetValue(lstBinary, true, null);
             doubleBufferPropertyInfo.SetValue(lstRegister, true, null);
             doubleBufferPropertyInfo.SetValue(lstMemory, true, null);
+
+            InitializeDeviceList();
         }
         #endregion
         #region private void SoC_Resize(object sender, EventArgs e)
@@ -52,7 +61,7 @@ namespace SoC
             lblProgramCounter.Size = new Size(tbpSource.Size.Width - 2 * dx, lblProgramCounter.Height);
 
             lstBinary.Location = new Point(dx, 2 * dy + lblProgramCounter.Height);
-            lstBinary.Size = new Size(tbpEmulator.Size.Width - lstRegister.Size.Width - lstMemory.Size.Width - 4 * dx, tbpEmulator.Size.Height - 3 * dy - lblProgramCounter.Height);
+            lstBinary.Size = new Size(tbpDevice.Size.Width - lstRegister.Size.Width - lstMemory.Size.Width - 4 * dx, tbpDevice.Size.Height - 3 * dy - lblProgramCounter.Height);
             chkBinaryDisplay.Location = new Point(lstBinary.Location.X + lstBinary.Size.Width - chkBinaryDisplay.Width, dy);
 
             lstRegister.Location = new Point(dx + lstBinary.Size.Width + dx, lstBinary.Location.Y);
@@ -67,8 +76,8 @@ namespace SoC
         #region private void SoC_FormClosing(object sender, FormClosingEventArgs e)
         private void SoC_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (emulator != null)
-                emulator.Break();
+            if (connectedDevice != null)
+                connectedDevice.Destroy();
         }
         #endregion
         #region private void tctMain_SelectedIndexChanged(object sender, EventArgs e)
@@ -157,14 +166,14 @@ namespace SoC
                     MessageBox.Show("Could not read file from disk. Error: " + ex.Message);
                 }
 
-                InitializeEmulator();
+                //InitializeEmulator();
             }
         }
         #endregion
         #region private void btnAssemble_Click(object sender, EventArgs e)
         private void btnAssemble_Click(object sender, EventArgs e)
         {
-            InitializeEmulator();
+            AssembleAndDisplaySource();
         }
         #endregion
         #region private void btnSave_Click(object sender, EventArgs e)
@@ -246,136 +255,16 @@ namespace SoC
         #endregion
 
         List<Line> Source = null;
-        Dictionary<int, Opcode> Program = null;
+        public static Dictionary<int, Opcode> Program = null;
         UInt16[] Memory = null;
-        Emulator emulator = null;
-        EmulatorDisplay display = null;
-
-        #region private void btnDebugReset_Click(object sender, EventArgs e)
-        private void btnDebugReset_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // reset the emulator state to the start options (probably has to be configurable)
-                tctMain.SelectedTab = tbpEmulator;
-
-                InitializeEmulator();
-                emulator.Reset();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-        #endregion
-        #region private void btnDebugStep_Click(object sender, EventArgs e)
-        private void btnDebugStep_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (emulator == null)
-                    return;
-
-                tctMain.SelectedTab = tbpEmulator;
-                emulator.Step();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-        #endregion
-        #region private void btnDebugRun_Click(object sender, EventArgs e)
-        private void btnDebugRun_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (emulator == null)
-                    return;
-
-                tctMain.SelectedTab = tbpEmulator;
-                emulator.Run();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-        #endregion
-        #region private void btnDebugBreak_Click(object sender, EventArgs e)
-        private void btnDebugBreak_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (emulator == null)
-                    return;
-
-                tctMain.SelectedTab = tbpEmulator;
-                emulator.Break();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-        #endregion
-        #region private void btnDebugDisplay_Click(object sender, EventArgs e)
-        private void btnDebugDisplay_Click(object sender, EventArgs e)
-        {
-            if (emulator == null)
-                return;
-
-            // show the display as a popup (always on top?)
-            if (display == null || display.IsDisposed)
-            {
-                display = new EmulatorDisplay(emulator);
-            }
-
-            display.Show();
-        }
-        #endregion
-
-        // Emulator events
-        #region void emulator_RegisterChanged(object o, RegisterChangedEventArgs e)
-        void emulator_RegisterChanged(object o, RegisterChangedEventArgs e)
-        {
-            if (!chkRegisterDisplay.Checked)
-                return;
-
-            e.Register.ListViewItem.SubItems[1].Text = e.Register.ValueString;
-            lstRegister.Refresh();
-        }
-        #endregion
-        #region void emulator_ProgramCounterChanged(object o, ProgramCounterChangedEventArgs e)
-        void emulator_ProgramCounterChanged(object o, ProgramCounterChangedEventArgs e)
-        {
-            if (!chkBinaryDisplay.Checked)
-                return;
-
-            if (e.OldLine != null)
-            {
-                e.OldLine.ListViewItem[e.OldProgramCounter - e.OldLine.Opcodes[0].Address].BackColor = Color.White;
-                e.OldLine.ListViewItem[e.OldProgramCounter - e.OldLine.Opcodes[0].Address].ForeColor = Color.Black;
-            }
-            if (e.NewLine != null)
-            {
-                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].BackColor = Color.Green;
-                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].ForeColor = Color.White;
-
-                e.NewLine.ListViewItem[e.NewProgramCounter - e.NewLine.Opcodes[0].Address].EnsureVisible();
-            }
-
-            lblProgramCounter.Text = "0x" + e.NewProgramCounter.ToString("X").PadLeft(4, '0');
-        }
-        #endregion
 
         // Helper functions
-        private void InitializeEmulator()
+        private void AssembleAndDisplaySource()
         {
             // Assemble the program
             if (Memory == null)
             {
-                AssemblerOutput asout = Assembler.Assemble(txtCode.Text);
+                AssemblerOutput asout = AssemblerMain.Assemble(txtCode.Text);
                 Source = asout.Source;
                 Program = asout.Binary;
                 Memory = asout.Memory;
@@ -391,14 +280,7 @@ namespace SoC
                 DisplayBinary(Program);
             }
 
-            tctMain.SelectedTab = tbpEmulator;
-
-            emulator = new Emulator(Program);
-            emulator.ProgramCounterChanged += new ProgramCounterChangedEventHandler(emulator_ProgramCounterChanged);
-            emulator.RegisterChanged += new RegisterChangedEventHandler(emulator_RegisterChanged);
-            emulator.Reset();
-
-            DisplayRegisters(emulator.Register);
+            tctMain.SelectedTab = tbpDevice;
         }
         #region private void DisplaySource(List<Line> source)
         private void DisplaySource(List<Line> source)
@@ -406,15 +288,6 @@ namespace SoC
             lstBinary.Items.Clear();
             foreach (Line line in source)
                 lstBinary.Items.AddRange(line.ListViewItem);
-        }
-        #endregion
-        #region private void DisplayRegisters()
-        private void DisplayRegisters(Register[] list)
-        {
-            lstRegister.Items.Clear();
-
-            foreach (Register reg in list)
-                lstRegister.Items.Add(reg.ListViewItem);
         }
         #endregion
         #region private void DisplayBinary(Dictionary<int, Line> binary)
@@ -501,6 +374,211 @@ namespace SoC
                     writer.WriteLine(Memory[len-1].ToString("X") + ";");
                 }
             }
+        }
+        #endregion
+
+
+        // Device handling
+        IDevice connectedDevice = null;
+
+        // Helpers
+        #region private void InitializeDeviceList()
+        private void InitializeDeviceList()
+        {
+            string deviceString = Settings.Default.Devices;
+            if (String.IsNullOrEmpty(deviceString))
+                return;
+
+            string[] devices = deviceString.Split(',');
+            foreach (string device in devices)
+            {
+                try
+                {
+                    Type elementType = Type.GetType(device);
+                    SoCDevices.Add((IDevice)Activator.CreateInstance(elementType));
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Device: " + device + "\r\n" + ex.Message);
+                }
+            }
+
+            foreach (IDevice d in SoCDevices)
+            {
+                cmbDevices.Items.Add(d);
+            }
+
+            if (SoCDevices.Count > 0)
+                cmbDevices.SelectedItem = SoCDevices[0];
+        }
+        #endregion
+        #region private void EnableDisableDeviceActions()
+        private void EnableDisableDeviceActions()
+        {
+            IDevice device = (IDevice)cmbDevices.SelectedItem;
+
+            if (connectedDevice == null)
+            {
+                cmbDevices.Enabled = true;
+                btnDeviceConfigure.Enabled = (device == null) ? false : device.CanConfigure;
+                btnDeviceConnect.Enabled = (device != null);
+                btnDeviceDisconnect.Enabled = false;
+
+                btnDeviceReset.Enabled = false;
+                btnDeviceHalt.Enabled = false;
+                btnDeviceResume.Enabled = false;
+                btnDeviceStep.Enabled = false;
+                btnDeviceReadAll.Enabled = false;
+                btnDeviceUpload.Enabled = false;
+                btnDeviceDisplay.Enabled = false;
+            }
+            else
+            {
+                cmbDevices.Enabled = false;
+                btnDeviceConfigure.Enabled = false;
+                btnDeviceConnect.Enabled = false;
+                btnDeviceDisconnect.Enabled = true;
+
+                btnDeviceReset.Enabled = connectedDevice.CanReset;
+                btnDeviceHalt.Enabled = connectedDevice.CanHalt;
+                btnDeviceResume.Enabled = connectedDevice.CanResume;
+                btnDeviceStep.Enabled = connectedDevice.CanStep;
+                btnDeviceUpload.Enabled = true;
+                btnDeviceReadAll.Enabled = true;
+                btnDeviceDisplay.Enabled = connectedDevice.CanDisplay;
+            }
+        }
+        #endregion
+
+        // Event handlers
+        #region private void cmbDevices_SelectedIndexChanged(object sender, EventArgs e)
+        private void cmbDevices_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            EnableDisableDeviceActions();
+        }
+        #endregion
+        #region private void btnDeviceConfigure_Click(object sender, EventArgs e)
+        private void btnDeviceConfigure_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                IDevice device = (IDevice)cmbDevices.SelectedItem;
+                device.Configure();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        #endregion
+        #region private void btnDeviceConnect_Click(object sender, EventArgs e)
+        private void btnDeviceConnect_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                AssembleAndDisplaySource();
+
+                // Connect to the device
+                connectedDevice = (IDevice)cmbDevices.SelectedItem;
+                connectedDevice.Instantiate();
+            }
+            catch (Exception ex)
+            {
+                connectedDevice = null;
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                EnableDisableDeviceActions();
+            }
+        }
+        #endregion
+        #region private void btnDeviceDisconnect_Click(object sender, EventArgs e)
+        private void btnDeviceDisconnect_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                connectedDevice.Destroy();
+                connectedDevice = null;
+            }
+            catch (Exception ex)
+            {
+                connectedDevice = null;
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                EnableDisableDeviceActions();
+            }
+        }
+        #endregion
+
+        #region private void btnDeviceReset_Click(object sender, EventArgs e)
+        private void btnDeviceReset_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                connectedDevice.WriteCommand(0xb1);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        #endregion
+        #region private void btnDeviceHalt_Click(object sender, EventArgs e)
+        private void btnDeviceHalt_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                connectedDevice.WriteCommand(0xb2);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        #endregion
+        #region private void btnDeviceResume_Click(object sender, EventArgs e)
+        private void btnDeviceResume_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                connectedDevice.WriteCommand(0xb3);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        #endregion
+        #region private void btnDeviceStep_Click(object sender, EventArgs e)
+        private void btnDeviceStep_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                connectedDevice.WriteCommand(0xb4);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        #endregion
+
+        private void btnDeviceUpload_Click(object sender, EventArgs e)
+        {
+
+        }
+        private void btnDeviceReadAll_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        #region private void btnDeviceDisplay_Click(object sender, EventArgs e)
+        private void btnDeviceDisplay_Click(object sender, EventArgs e)
+        {
+            connectedDevice.ShowDisplay();
         }
         #endregion
     }

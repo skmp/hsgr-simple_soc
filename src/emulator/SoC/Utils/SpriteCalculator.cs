@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Drawing.Imaging;
 
-namespace SoC
+namespace SoC.Utils
 {
     public partial class SpriteCalculator : Form
     {

@@ -4,7 +4,7 @@ using System;
 using System.Drawing;
 using System.Collections;
 
-namespace SoC.BL.Entities
+namespace SoC.Assembler.Entities
 {
     public class Line
     {

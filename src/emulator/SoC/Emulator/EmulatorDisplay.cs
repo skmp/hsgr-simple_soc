@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using SoC.BL;
-using SoC.BL.Events;
+using SoC.Assembler;
+using SoC.Emulator;
+using SoC.Emulator.Events;
 using System.Drawing.Imaging;
 
-namespace SoC
+namespace SoC.Emulator
 {
     public partial class EmulatorDisplay : Form
     {
-        private double ZoomFactor = 3;
-        private Emulator emulator;
+        private double ZoomFactor = 1;
+        private EmulatorMain emulator;
         private Bitmap bitmap;
-        Color[] palette = { Color.Black, Color.Red, Color.LightGray, Color.DarkBlue, Color.Red, Color.Purple, Color.Yellow, Color.White };
+        //Color[] palette = { Color.Black, Color.Red, Color.LightGray, Color.DarkBlue, Color.Red, Color.Purple, Color.Yellow, Color.White };
+        Color[] palette = { Color.Black, Color.Red, Color.Blue, Color.Magenta, Color.Green, Color.Yellow, Color.Cyan, Color.White };
 
-        public EmulatorDisplay(Emulator emulator)
+        public EmulatorDisplay(EmulatorMain emulator)
         {
             InitializeComponent();
             this.emulator = emulator;
@@ -30,10 +32,7 @@ namespace SoC
             {
                 for (int Ycount = 0; Ycount < bitmap.Height; Ycount++)
                 {
-                    byte c = emulator.Display[Xcount, Ycount];
-                    // out of range colors set to black
-                    if (c > 7)
-                        c = 0;
+                    byte c = (byte)(emulator.Display[Xcount, Ycount] & 7);
 
                     bitmap.SetPixel(Xcount, Ycount, palette[c]);
                 }
