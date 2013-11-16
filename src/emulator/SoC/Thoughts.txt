@@ -21,9 +21,10 @@ Internal data
 a) The memory
 b) The registers
 c) The program counter
-
+d) The display buffer
 
 Generates Events
 a) ProgramCounter change
 b) Register change
 c) Memory change
+c) Display change
