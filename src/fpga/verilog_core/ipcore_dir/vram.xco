@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version 14.5
-# Date: Wed Oct 23 17:15:19 2013
+# Date: Wed Oct 30 20:09:10 2013
 #
 ##############################################################
 #
@@ -41,7 +41,7 @@ SELECT Block_Memory_Generator xilinx.com:ip:blk_mem_gen:7.3
 # BEGIN Parameters
 CSET additional_inputs_for_power_estimation=false
 CSET algorithm=Minimum_Area
-CSET assume_synchronous_clk=false
+CSET assume_synchronous_clk=true
 CSET axi_id_width=4
 CSET axi_slave_type=Memory_Slave
 CSET axi_type=AXI4_Full
@@ -57,14 +57,14 @@ CSET enable_32bit_address=false
 CSET enable_a=Always_Enabled
 CSET enable_b=Always_Enabled
 CSET error_injection_type=Single_Bit_Error_Injection
-CSET fill_remaining_memory_locations=false
+CSET fill_remaining_memory_locations=true
 CSET interface_type=Native
 CSET load_init_file=false
 CSET mem_file=no_Mem_file_loaded
 CSET memory_type=True_Dual_Port_RAM
 CSET operating_mode_a=WRITE_FIRST
 CSET operating_mode_b=WRITE_FIRST
-CSET output_reset_value_a=0
+CSET output_reset_value_a=3
 CSET output_reset_value_b=0
 CSET pipeline_stages=0
 CSET port_a_clock=100
@@ -82,7 +82,7 @@ CSET register_porta_output_of_memory_primitives=false
 CSET register_portb_output_of_memory_core=false
 CSET register_portb_output_of_memory_primitives=false
 CSET register_portb_output_of_softecc=false
-CSET remaining_memory_locations=0
+CSET remaining_memory_locations=7
 CSET reset_memory_latch_a=false
 CSET reset_memory_latch_b=false
 CSET reset_priority_a=CE
@@ -95,7 +95,7 @@ CSET use_byte_write_enable=false
 CSET use_error_injection_pins=false
 CSET use_regcea_pin=false
 CSET use_regceb_pin=false
-CSET use_rsta_pin=false
+CSET use_rsta_pin=true
 CSET use_rstb_pin=false
 CSET write_depth_a=65536
 CSET write_width_a=3
@@ -105,4 +105,4 @@ CSET write_width_b=3
 MISC pkg_timestamp=2012-11-19T16:22:25Z
 # END Extra information
 GENERATE
-# CRC: e9740cb9
+# CRC: 5adb44de

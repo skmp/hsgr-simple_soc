@@ -28,7 +28,7 @@
 `define VGA_PIXELS (VGA_VSIZE * VGA_HSIZE)
 `define PIXELS (VSIZE * HSIZE)
 
-module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G, I_SW);
+module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G, I_SW, O_TX, I_RX);
 
 `define s1_draw 0
 `define s1_movh 1
@@ -71,8 +71,18 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 `define state_memaccess 4
 `define state_memaccess_data 5
 `define state_vram_write 6
+`define state_vwait_in 7
+`define state_vwait_out 8
 
-
+	
+	//internal state for
+	reg [9:0] pixel; //current pixel, 0 to 831
+	reg [9:0] line;  //current line, 0 to 519
+	
+	//continuous assignment
+	//the moment pixel changes in_rgb is "instantly" updated
+	wire in_rgb = (pixel < `VGA_HSIZE) && (line < `VGA_VSIZE);
+	
 	input CLK;
 	input I_RESET;
 	input [3:0] I_SW;
@@ -90,7 +100,7 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 	reg  ram_we;
 	
 	reg vram_we;
-	reg [16:0] vram_address;
+	reg [15:0] vram_address;
 	reg [2:0] vram_in;
 	wire [2:0] vram_out;
 	
@@ -102,11 +112,12 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 	.douta(ram_out) // output [15 : 0] douta
 	);
 	
-	wire [16:0] vram_addrb;
+	wire [15:0] vram_addrb;
 	wire [2:0] vram_doutb;
 	
 	vram vram (
 	  .clka(CLK), // input clka
+	  .rsta(I_RESET), // input rsta
 	  .wea(vram_we), // input [0 : 0] wea
 	  .addra(vram_address), // input [16 : 0] addra
 	  .dina(vram_in), // input [2 : 0] dina
@@ -123,7 +134,7 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 	reg [15:0] regs[15:0];
 	reg [15:0] pc;
 	
-	reg [2:0] state;
+	reg [3:0] state;
 	
 	always@ (posedge CLK)
 	begin
@@ -280,11 +291,24 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 							`s1_ext_s3: 
 							case(op_s3)
 							`s3_jr: pc = regs[op_r3];
-							`s3_wait: ;
+							`s3_wait: state = `state_vwait_in;
 							endcase
 						endcase
 					end
 				end
+				
+				`state_vwait_in:
+				begin
+					if (O_VSYNC == 1)
+						state = `state_vwait_out;
+				end
+				
+				`state_vwait_out:
+				begin
+					if (O_VSYNC == 0)
+						state = `state_fetch;
+				end
+				
 				`state_memaccess:
 				begin
 					state = `state_memaccess_data;
@@ -311,16 +335,6 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 	begin
 		
 	end
-	
-	
-	
-	//internal state for
-	reg [9:0] pixel; //current pixel, 0 to 831
-	reg [9:0] line;  //current line, 0 to 519
-	
-	//continuous assignment
-	//the moment pixel changes in_rgb is "instantly" updated
-	wire in_rgb = (pixel < 640) && (line < 480);
 	
 	`define LINE_TOP		( (`VGA_VSIZE-`VSIZE)/2 )
 	`define LINE_BOTTOM	( `LINE_TOP + `VSIZE )
