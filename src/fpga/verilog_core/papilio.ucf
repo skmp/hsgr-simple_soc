@@ -45,7 +45,7 @@ CONFIG PART=XC3S500E-VQ100-4;
 #NET O_AUDIO_L      LOC="P84"  | IOSTANDARD=LVTTL | DRIVE=8 | SLEW=FAST;          # A14
 #NET O_AUDIO_R      LOC="P86"  | IOSTANDARD=LVTTL | DRIVE=8 | SLEW=FAST;          # A15
 
-NET CLK            LOC="P89"  | IOSTANDARD=LVTTL | PERIOD=31.25ns;               # CLK
+NET CLK_31M25      LOC="P89"  | PERIOD=31.25ns;               # CLK
 NET LED(3)         LOC="P35"  | IOSTANDARD=LVTTL;                                # A4
 NET LED(2)         LOC="P40"  | IOSTANDARD=LVTTL;                                # A5
 NET LED(1)         LOC="P53"  | IOSTANDARD=LVTTL;                                # A6

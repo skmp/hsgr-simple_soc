@@ -28,7 +28,7 @@
 `define VGA_PIXELS (VGA_VSIZE * VGA_HSIZE)
 `define PIXELS (VSIZE * HSIZE)
 
-module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G, I_SW, O_TX, I_RX);
+module core(CLK_31M25, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G, I_SW, O_TX, I_RX);
 
 `define s1_draw 0
 `define s1_movh 1
@@ -83,7 +83,12 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 	//the moment pixel changes in_rgb is "instantly" updated
 	wire in_rgb = (pixel < `VGA_HSIZE) && (line < `VGA_VSIZE);
 	
-	input CLK;
+	
+	input I_RX;
+	output O_TX;
+	
+	input CLK_31M25;
+	wire CLK;
 	input I_RESET;
 	input [3:0] I_SW;
 
@@ -415,5 +420,64 @@ module core(CLK, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_VIDEO_G
 		LED = I_SW ^ {4{I_RESET}};
 	end
 
+
+	wire [7:0] dout;
+	reg en_16_x_baud;
+	wire data_present;
+	reg [2:0] baud_count;
+	
+	
+	uart_tx uart_tx (
+	  .data_in(dout),
+	  .write_buffer(data_present),
+	  .reset_buffer(0),
+	  .en_16_x_baud(en_16_x_baud),
+	  .clk(CLK96),
+	  .serial_out(O_TX)
+	  /*
+	  .buffer_half_full(),
+	  .buffer_full(),
+	  */
+	);
+	
+	uart_rx uart_rx (
+		.serial_in(I_RX),
+		.read_buffer(1),
+		.reset_buffer(0),
+		
+		.en_16_x_baud(en_16_x_baud),
+		.clk(CLK96),
+		.data_out(dout),
+		.buffer_data_present(data_present)
+/*	
+		.buffer_half_full(rx),
+		.buffer_full(rx),
+*/
+	);
+
+
+	always@ (posedge CLK96)
+	begin
+		if (baud_count==1)
+		begin
+			baud_count = 0;
+			en_16_x_baud = 1;
+		end
+		else
+		begin
+			baud_count = baud_count + 1;
+			en_16_x_baud = 0;
+		end
+	end
+
+	dcm32to96 serial_clock_dcm (
+    .CLKIN_IN(CLK_31M25), 
+    .CLKFX_OUT(CLK96),
+	 .CLK0_OUT(CLK)
+	 /*
+    .CLKIN_IBUFG_OUT(CLK), 
+	 */
+    );
+	
 endmodule
 
