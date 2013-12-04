@@ -16,7 +16,6 @@ namespace SoC.Device
         bool CanHalt { get; }
         bool CanResume { get; }
         bool CanStep { get; }
-        bool CanDisplay { get; }
 
         // do
         void Configure();
@@ -25,6 +24,7 @@ namespace SoC.Device
         void Destroy();
 
         // extensions
+        bool CanDisplay { get; }
         void ShowDisplay();
     }
 }

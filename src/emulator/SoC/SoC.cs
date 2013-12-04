@@ -16,6 +16,7 @@ using SoC.Utils;
 using System.Configuration;
 using SoC.Device;
 using SoC.Properties;
+using System.Threading;
 
 namespace SoC
 {
@@ -166,7 +167,7 @@ namespace SoC
                     MessageBox.Show("Could not read file from disk. Error: " + ex.Message);
                 }
 
-                //InitializeEmulator();
+                AssembleAndDisplaySource();
             }
         }
         #endregion
@@ -205,7 +206,7 @@ namespace SoC
                             for (int addr = 0; addr < len; addr++)
                             {
                                 writer.Write((byte)(Memory[addr] & 0xff));
-                                writer.Write((byte)((Memory[addr]>>8) & 0xff));
+                                writer.Write((byte)((Memory[addr] >> 8) & 0xff));
                             }
                         }
                     }
@@ -324,7 +325,7 @@ namespace SoC
         {
             Dictionary<int, Opcode> binary = new Dictionary<int, Opcode>();
 
-            for (int addr=0; addr<8192; addr++)
+            for (int addr = 0; addr < 8192; addr++)
             {
                 binary.Add(addr, OpcodeDictionary.Get(memory[addr]));
             }
@@ -367,11 +368,11 @@ namespace SoC
                     writer.WriteLine("MEMORY_INITIALIZATION_RADIX=16;");
                     writer.WriteLine("MEMORY_INITIALIZATION_VECTOR=");
                     int len = 8192;
-                    for (int addr = 0; addr < len-1; addr++)
+                    for (int addr = 0; addr < len - 1; addr++)
                     {
                         writer.WriteLine(Memory[addr].ToString("X") + ",");
                     }
-                    writer.WriteLine(Memory[len-1].ToString("X") + ";");
+                    writer.WriteLine(Memory[len - 1].ToString("X") + ";");
                 }
             }
         }
@@ -518,7 +519,9 @@ namespace SoC
         {
             try
             {
-                connectedDevice.WriteCommand(0xb1);
+                Ice.SetResetSignal(connectedDevice);
+                Thread.Sleep(500);
+                Ice.UnsetResetSignal(connectedDevice);
             }
             catch (Exception ex)
             {
@@ -531,7 +534,7 @@ namespace SoC
         {
             try
             {
-                connectedDevice.WriteCommand(0xb2);
+                Ice.Halt(connectedDevice);
             }
             catch (Exception ex)
             {
@@ -544,7 +547,7 @@ namespace SoC
         {
             try
             {
-                connectedDevice.WriteCommand(0xb3);
+                Ice.Resume(connectedDevice);
             }
             catch (Exception ex)
             {
@@ -557,7 +560,12 @@ namespace SoC
         {
             try
             {
-                connectedDevice.WriteCommand(0xb4);
+                Ice.Step(connectedDevice);
+
+                if (chkRegisterDisplay.Checked)
+                    DisplayRegisters();
+                if (chkBinaryDisplay.Checked)
+                    HighlightProgramCounter();
             }
             catch (Exception ex)
             {
@@ -572,13 +580,67 @@ namespace SoC
         }
         private void btnDeviceReadAll_Click(object sender, EventArgs e)
         {
-
+            try
+            {
+                DisplayRegisters();
+                HighlightProgramCounter();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         #region private void btnDeviceDisplay_Click(object sender, EventArgs e)
         private void btnDeviceDisplay_Click(object sender, EventArgs e)
         {
             connectedDevice.ShowDisplay();
+        }
+        #endregion
+
+
+
+        #region private void DisplayRegisters()
+        private void DisplayRegisters()
+        {
+            ushort value;
+            ListViewItem lvi;
+            lstRegister.Items.Clear();
+            for (int i = 0; i < 16; i++)
+            {
+                value = Ice.ReadRegister(connectedDevice, i);
+
+                lvi = new ListViewItem();
+                lvi.SubItems[0].Text = "r" + i.ToString();
+                lvi.SubItems.Add("0x" + value.ToString("X").PadLeft(4, '0') + " (" + value.ToString() + ")");
+                lstRegister.Items.Add(lvi);
+            }
+        }
+        #endregion
+        #region private void HighlightProgramCounter()
+        private int oldPC = -1;
+        private void HighlightProgramCounter()
+        {
+            int PC = Ice.ReadProgramCounter(connectedDevice);
+            Line line;
+
+            if (oldPC >= 0)
+            {
+                line = Program[oldPC].SourceLine;
+                line.ListViewItem[oldPC - line.Opcodes[0].Address].BackColor = Color.White;
+                line.ListViewItem[oldPC - line.Opcodes[0].Address].ForeColor = Color.Black;
+            }
+
+            if (PC >= 0)
+            {
+                line = Program[PC].SourceLine;
+                line.ListViewItem[PC - line.Opcodes[0].Address].BackColor = Color.Green;
+                line.ListViewItem[PC - line.Opcodes[0].Address].ForeColor = Color.White;
+
+                line.ListViewItem[PC - line.Opcodes[0].Address].EnsureVisible();
+            }
+
+            oldPC = PC;
         }
         #endregion
     }

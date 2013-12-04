@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Assembler\AssemblerMain.cs" />
     <Compile Include="Device\Emulator\EmulatorDevice.cs" />
+    <Compile Include="Device\Ice.cs" />
     <Compile Include="Device\IDevice.cs" />
     <Compile Include="Device\Papilio\PapilioConfiguration.cs">
       <SubType>Form</SubType>
