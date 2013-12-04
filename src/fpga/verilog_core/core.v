@@ -421,14 +421,20 @@ module core(CLK_31M25, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_V
 	end
 
 
-	wire [7:0] dout;
+
+
+	reg [15:0] ice_addr;
+	reg [15:0] ice_data;
+
+
+	wire [7:0] ice_in;
 	reg en_16_x_baud;
 	wire data_present;
 	reg [2:0] baud_count;
 	
 	
 	uart_tx uart_tx (
-	  .data_in(dout),
+	  .data_in(ice_addr),
 	  .write_buffer(data_present),
 	  .reset_buffer(0),
 	  .en_16_x_baud(en_16_x_baud),
@@ -447,14 +453,61 @@ module core(CLK_31M25, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_V
 		
 		.en_16_x_baud(en_16_x_baud),
 		.clk(CLK96),
-		.data_out(dout),
+		.data_out(ice_in),
 		.buffer_data_present(data_present)
 /*	
 		.buffer_half_full(rx),
 		.buffer_full(rx),
 */
 	);
-
+	
+	assign ice_in_sf = (4*ice_in[5:4]);
+	assign ice_in_data = ice_in[3:0];
+	assign ice_in_cmd = ice_in[7:4];
+	
+	reg ice_core_reset;
+	reg [1:0] ice_core_state;
+	
+	always@ (posedge CLK96)
+	begin
+		if (data_present == 1)
+		begin
+			if (ice_in_cmd<4)
+			begin
+				ice_addr = ice_addr & ~(15<<ice_in_sf) | (ice_in_data<<ice_in_sf); 
+			end
+			else if (ice_in_cmd<8)
+			begin
+				ice_data = ice_data & ~(15<<ice_in_sf) | (ice_in_data<<ice_in_sf);
+			end
+			else if (ice_in_cmd == 8)
+			begin
+				
+			end
+			else if (ice_in_cmd == 9)
+			begin
+				
+			end
+			else if (ice_in_cmd == 10)
+			begin
+				
+			end
+			else if (ice_in_cmd == 11)
+			begin
+				case (ice_in_data)
+					0: ice_core_reset = 0;
+					1: ice_core_reset = 1;
+					
+					2: ice_core_state = 0;
+					3: ice_core_state = 1;
+					4: ice_core_state = 2;
+					
+					5: pc = ice_data;
+					6: ice_data = pc;
+				endcase
+			end
+		end
+	end
 
 	always@ (posedge CLK96)
 	begin
