@@ -81,7 +81,7 @@ namespace SoC.Emulator
         }
 
         // State
-        int ProgramCounter;
+        public int ProgramCounter;
         public Register[] Register;
         public UInt16[] Memory;
         public byte[,] Display;
@@ -102,7 +102,7 @@ namespace SoC.Emulator
 
         public void Step()
         {
-            breakFlag = true;
+            //breakFlag = true;
 
             Opcode op = Program[ProgramCounter];
 
