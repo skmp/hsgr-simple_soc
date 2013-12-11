@@ -110,7 +110,7 @@ module core(CLK_31M25, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_V
 	wire [2:0] vram_out;
 	
 	mem ram (
-	.clka(CLK), // input clka
+	.clka(CLK96), // input clka
 	.wea(ram_we), // input [0 : 0] wea
 	.addra(ram_address), // input [12 : 0] addra
 	.dina(ram_in), // input [15 : 0] dina
@@ -121,7 +121,7 @@ module core(CLK_31M25, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_V
 	wire [2:0] vram_doutb;
 	
 	vram vram (
-	  .clka(CLK), // input clka
+	  .clka(CLK96), // input clka
 	  .rsta(I_RESET), // input rsta
 	  .wea(vram_we), // input [0 : 0] wea
 	  .addra(vram_address), // input [16 : 0] addra
@@ -141,7 +141,7 @@ module core(CLK_31M25, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_V
 	
 	reg [3:0] state;
 	
-	always@ (posedge CLK)
+	always@ (posedge CLK96)
 	begin
 		//LED = 0;
 	end
@@ -430,12 +430,13 @@ module core(CLK_31M25, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_V
 	wire [7:0] ice_in;
 	reg en_16_x_baud;
 	wire data_present;
+	reg delay_data_present;
 	reg [2:0] baud_count;
 	
 	
 	uart_tx uart_tx (
 	  .data_in(ice_addr),
-	  .write_buffer(data_present),
+	  .write_buffer(delay_data_present),
 	  .reset_buffer(0),
 	  .en_16_x_baud(en_16_x_baud),
 	  .clk(CLK96),
@@ -461,6 +462,10 @@ module core(CLK_31M25, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_V
 */
 	);
 	
+	wire [3:0] ice_in_sf;
+	wire [3:0] ice_in_data;
+	wire [3:0] ice_in_cmd;
+	
 	assign ice_in_sf = (4*ice_in[5:4]);
 	assign ice_in_data = ice_in[3:0];
 	assign ice_in_cmd = ice_in[7:4];
@@ -470,15 +475,17 @@ module core(CLK_31M25, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_V
 	
 	always@ (posedge CLK96)
 	begin
+		delay_data_present = data_present;
+	
 		if (data_present == 1)
 		begin
 			if (ice_in_cmd<4)
 			begin
-				ice_addr = ice_addr & ~(15<<ice_in_sf) | (ice_in_data<<ice_in_sf); 
+				ice_addr = ice_addr & ~(16'hf<<ice_in_sf) | ({{12{0}},ice_in_data}<<ice_in_sf); 
 			end
 			else if (ice_in_cmd<8)
 			begin
-				ice_data = ice_data & ~(15<<ice_in_sf) | (ice_in_data<<ice_in_sf);
+				ice_data = ice_data & ~(16'hf<<ice_in_sf) | ({{12{0}},ice_in_data}<<ice_in_sf);
 			end
 			else if (ice_in_cmd == 8)
 			begin
@@ -502,7 +509,7 @@ module core(CLK_31M25, LED, I_RESET, O_VSYNC, O_HSYNC, O_VIDEO_R, O_VIDEO_B, O_V
 					3: ice_core_state = 1;
 					4: ice_core_state = 2;
 					
-					5: pc = ice_data;
+					//5: pc = ice_data;
 					6: ice_data = pc;
 				endcase
 			end
