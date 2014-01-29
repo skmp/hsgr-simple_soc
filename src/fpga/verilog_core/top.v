@@ -8,6 +8,25 @@ module top(CLK_31M25, LED, I_RESET, I_SW, O_TX, I_RX, O_VSYNC, O_HSYNC, O_VIDEO_
 
 	output [3:0] LED;
 	input [3:0] I_SW;
+	
+	wire CLK_CPU;
+	wire CLK_VGA;
+
+	wire [15:0] CPU_VBUS_ADDR;
+	wire [2:0]	CPU_VBUS_DATA_TOVRAM;
+	wire [2:0]	CPU_VBUS_DATA_FROMVRAM;
+	wire 			CPU_VBUS_WE;
+	
+	wire [15:0] VGA_VBUS_ADDR;
+	wire [2:0]	VGA_VBUS_DATA;
+	
+	wire [7:0]	ICE_BUS_CMD;
+	wire [7:0]	ICE_BUS_RESP;
+	wire [15:0]	ICE_BUS_TOICE;
+	wire [15:0]	ICE_BUS_FROMICE;
+	
+	assign I_NRESET = ~I_RESET;
+	
 	/*
 		
 		Clock domains
@@ -26,33 +45,18 @@ module top(CLK_31M25, LED, I_RESET, I_SW, O_TX, I_RX, O_VSYNC, O_HSYNC, O_VIDEO_
 			CLK_CPU    |_|_|_|_|_|_|_|
 			CLK_VGA	  |||___|||___|||
 	*/
-
-	wire CLK_CPU;
-	wire CLK_VGA;
-
-	wire [15:0] CPU_VBUS_ADDR;
-	wire [2:0]	CPU_VBUS_DATA_TOVRAM;
-	wire [2:0]	CPU_VBUS_DATA_FROMVRAM;
-	wire 			CPU_VBUS_WE;
 	
-	wire [15:0] VGA_VBUS_ADDR;
-	wire [2:0]	VGA_VBUS_DATA;
+	/*
+		dcm32to96 serial_clock_dcm (
+			.CLKIN_IN(CLK_31M25), 
+			.CLKFX_OUT(CLK_CPU),	//3*31.25 mhz
+			.CLK0_OUT(CLK_VGA)		//same as input, in phase with FX_OUT
+		);
+	*/
 	
-	wire [7:0]	ICE_BUS_CMD;
-	wire [7:0]	ICE_BUS_RESP;
-	wire [15:0]	ICE_BUS_TOICE;
-	wire [15:0]	ICE_BUS_FROMICE;
+	assign CLK_CPU = CLK_31M25;
+	assign CLK_VGA = CLK_31M25;
 	
-	assign I_NRESET = ~I_RESET;
-
-	assign LED = I_SW;	
-	
-	dcm32to96 serial_clock_dcm (
-		.CLKIN_IN(CLK_31M25), 
-		.CLKFX_OUT(CLK_CPU),	//3*31.25 mhz
-		.CLK0_OUT(CLK_VGA)		//same as input, in phase with FX_OUT
-	);
-
 	vram vram (
 		.rsta(I_RESET), // input rsta
 
@@ -65,15 +69,15 @@ module top(CLK_31M25, LED, I_RESET, I_SW, O_TX, I_RX, O_VSYNC, O_HSYNC, O_VIDEO_
 
 		//vram/vga ramdac
 		.clkb(CLK_VGA),
-		.addrb(VGA_BUS_ADDR),
-		.doutb(VGA_BUS_DATA), // output [2 : 0] doutb
+		.addrb(VGA_VBUS_ADDR),
+		.doutb(VGA_VBUS_DATA), // output [2 : 0] doutb
 		.web(0),	//no writes
 		.dinb(0)
 	);
 	
 	core core (
 		.CLK(CLK_CPU),
-		.O_LED(O_LED),
+		.O_LED(LED),
 		.I_RESET(I_RESET),
 		.I_SW(I_SW),
 

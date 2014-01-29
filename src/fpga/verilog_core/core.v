@@ -85,7 +85,7 @@ module core(
 	
 	input [3:0] I_SW;
 
-	output reg [3:0] O_LED;
+	output [3:0] O_LED;
 
 	output reg O_VBUS_WE;
 	output reg [15:0] O_VBUS_ADDR;
@@ -97,42 +97,20 @@ module core(
 	wire [15:0] ram_out;
 	reg  ram_we;
 	
+	assign O_LED = I_SW;
+	
 	mem ram (
-		.clka(CLK96), // input clka
+		.clka(CLK), // input clka
 		.wea(ram_we), // input [0 : 0] wea
 		.addra(ram_address), // input [12 : 0] addra
 		.dina(ram_in), // input [15 : 0] dina
 		.douta(ram_out) // output [15 : 0] douta
 	);
 	
-	wire [15:0] vram_addrb;
-	wire [2:0] vram_doutb;
-	
-	vram vram (
-	  .clka(CLK96), // input clka
-	  .rsta(I_RESET), // input rsta
-	  .wea(vram_we), // input [0 : 0] wea
-	  .addra(vram_address), // input [16 : 0] addra
-	  .dina(vram_in), // input [2 : 0] dina
-	  .douta(vram_out), // output [2 : 0] douta
-	  
-	  .clkb(CLK), // input clkb
-	  .web(0), // input [0 : 0] web
-	  .addrb(vram_addrb), // input [16 : 0] addrb
-	  .dinb(vram_dinb), // input [2 : 0] dinb
-	  .doutb(vram_doutb) // output [2 : 0] doutb
-	);
-	
-	
 	reg [15:0] regs[15:0];
 	reg [15:0] pc;
 	
 	reg [3:0] state;
-	
-	always@ (posedge CLK96)
-	begin
-		//LED = 0;
-	end
 	
 	reg [15:0] opcode;
 	
@@ -194,8 +172,12 @@ module core(
 			case(state)
 				`state_fetch:
 				begin
+				//if (ice_command)
+				//.....
+				
 					ram_address = pc;
 					// advance the state
+					//if (!halt)
 					state=`state_fetch_addr;
 				end
 				
