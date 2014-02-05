@@ -24,7 +24,7 @@ namespace SoC.Device.Papilio
         private void PapilioConfiguration_Load(object sender, EventArgs e)
         {
             cboPort.Items.AddRange(SerialPort.GetPortNames());
-            cboBaudRate.Items.AddRange(new string[] { "3000000" });
+            cboBaudRate.Items.AddRange(new string[] { "1000000", "3000000" });
             cboDataBits.Items.AddRange(new string[] { "8" });
             cboParity.Items.AddRange(Enum.GetNames(typeof(Parity)));
             cboStopBits.Items.AddRange(Enum.GetNames(typeof(StopBits)));

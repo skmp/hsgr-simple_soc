@@ -10,20 +10,21 @@ module ice(
 	reg [15:0] ice_addr;
 	reg [15:0] ice_data;
 
-
 	wire [7:0] ice_in;
 	reg en_16_x_baud;
 	wire data_present;
 	reg delay_data_present;
 	reg [2:0] baud_count;
 	
+	assign ICE_BUS_CMD = 0;
+	assign ICE_BUS_FROMICE = 0;
 	
 	uart_tx uart_tx (
 	  .data_in(ice_addr),
 	  .write_buffer(delay_data_present),
 	  .reset_buffer(0),
 	  .en_16_x_baud(en_16_x_baud),
-	  .clk(CLK96),
+	  .clk(CLK),
 	  .serial_out(O_TX)
 	  /*
 	  .buffer_half_full(),
@@ -37,7 +38,7 @@ module ice(
 		.reset_buffer(0),
 		
 		.en_16_x_baud(en_16_x_baud),
-		.clk(CLK96),
+		.clk(CLK),
 		.data_out(ice_in),
 		.buffer_data_present(data_present)
 /*	
@@ -57,7 +58,7 @@ module ice(
 	reg ice_core_reset;
 	reg [1:0] ice_core_state;
 	
-	always@ (posedge CLK96)
+	always@ (posedge CLK)
 	begin
 		delay_data_present = data_present;
 	
@@ -100,7 +101,7 @@ module ice(
 		end
 	end
 
-	always@ (posedge CLK96)
+	always@ (posedge CLK)
 	begin
 		if (baud_count==1)
 		begin
