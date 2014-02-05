@@ -432,6 +432,8 @@ namespace SoC
                 btnDeviceReadAll.Enabled = false;
                 btnDeviceUpload.Enabled = false;
                 btnDeviceDisplay.Enabled = false;
+
+                btnDeviceVramWrite.Enabled = false;
             }
             else
             {
@@ -447,6 +449,8 @@ namespace SoC
                 btnDeviceUpload.Enabled = true;
                 btnDeviceReadAll.Enabled = true;
                 btnDeviceDisplay.Enabled = connectedDevice.CanDisplay;
+
+                btnDeviceVramWrite.Enabled = true;
             }
         }
         #endregion
@@ -574,6 +578,18 @@ namespace SoC
         }
         #endregion
 
+        private void btnDeviceVramWrite_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                WriteVram();
+                HighlightProgramCounter();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
         private void btnDeviceUpload_Click(object sender, EventArgs e)
         {
 
@@ -600,6 +616,15 @@ namespace SoC
 
 
 
+        #region private void WriteVram()
+        private void WriteVram()
+        {
+            Random r = new Random(0);
+            for (int x = 0; x < 256; x++)
+                for (int y = 0; y < 256; y++)
+                    Ice.WriteVramValue(connectedDevice, x * y, (ushort)r.Next(3));
+        }
+        #endregion
         #region private void DisplayRegisters()
         private void DisplayRegisters()
         {

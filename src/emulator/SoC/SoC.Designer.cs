@@ -68,6 +68,7 @@
             this.btnDeviceDisplay = new System.Windows.Forms.Button();
             this.btnDeviceStep = new System.Windows.Forms.Button();
             this.btnDeviceReset = new System.Windows.Forms.Button();
+            this.btnDeviceVramWrite = new System.Windows.Forms.Button();
             this.tctMain.SuspendLayout();
             this.tbpSource.SuspendLayout();
             this.tbpDevice.SuspendLayout();
@@ -337,6 +338,7 @@
             // 
             // grpDebug
             // 
+            this.grpDebug.Controls.Add(this.btnDeviceVramWrite);
             this.grpDebug.Controls.Add(this.btnDeviceUpload);
             this.grpDebug.Controls.Add(this.btnDeviceDisconnect);
             this.grpDebug.Controls.Add(this.btnDeviceConnect);
@@ -358,7 +360,7 @@
             // btnDeviceUpload
             // 
             this.btnDeviceUpload.Enabled = false;
-            this.btnDeviceUpload.Location = new System.Drawing.Point(19, 292);
+            this.btnDeviceUpload.Location = new System.Drawing.Point(19, 302);
             this.btnDeviceUpload.Name = "btnDeviceUpload";
             this.btnDeviceUpload.Size = new System.Drawing.Size(75, 23);
             this.btnDeviceUpload.TabIndex = 14;
@@ -400,7 +402,7 @@
             // btnDeviceReadAll
             // 
             this.btnDeviceReadAll.Enabled = false;
-            this.btnDeviceReadAll.Location = new System.Drawing.Point(19, 321);
+            this.btnDeviceReadAll.Location = new System.Drawing.Point(19, 331);
             this.btnDeviceReadAll.Name = "btnDeviceReadAll";
             this.btnDeviceReadAll.Size = new System.Drawing.Size(75, 23);
             this.btnDeviceReadAll.TabIndex = 10;
@@ -421,7 +423,7 @@
             // btnDeviceHalt
             // 
             this.btnDeviceHalt.Enabled = false;
-            this.btnDeviceHalt.Location = new System.Drawing.Point(19, 185);
+            this.btnDeviceHalt.Location = new System.Drawing.Point(19, 173);
             this.btnDeviceHalt.Name = "btnDeviceHalt";
             this.btnDeviceHalt.Size = new System.Drawing.Size(75, 23);
             this.btnDeviceHalt.TabIndex = 8;
@@ -432,7 +434,7 @@
             // btnDeviceResume
             // 
             this.btnDeviceResume.Enabled = false;
-            this.btnDeviceResume.Location = new System.Drawing.Point(19, 214);
+            this.btnDeviceResume.Location = new System.Drawing.Point(19, 202);
             this.btnDeviceResume.Name = "btnDeviceResume";
             this.btnDeviceResume.Size = new System.Drawing.Size(75, 23);
             this.btnDeviceResume.TabIndex = 7;
@@ -454,7 +456,7 @@
             // btnDeviceStep
             // 
             this.btnDeviceStep.Enabled = false;
-            this.btnDeviceStep.Location = new System.Drawing.Point(19, 243);
+            this.btnDeviceStep.Location = new System.Drawing.Point(19, 231);
             this.btnDeviceStep.Name = "btnDeviceStep";
             this.btnDeviceStep.Size = new System.Drawing.Size(75, 23);
             this.btnDeviceStep.TabIndex = 5;
@@ -465,13 +467,24 @@
             // btnDeviceReset
             // 
             this.btnDeviceReset.Enabled = false;
-            this.btnDeviceReset.Location = new System.Drawing.Point(19, 156);
+            this.btnDeviceReset.Location = new System.Drawing.Point(19, 144);
             this.btnDeviceReset.Name = "btnDeviceReset";
             this.btnDeviceReset.Size = new System.Drawing.Size(75, 23);
             this.btnDeviceReset.TabIndex = 4;
             this.btnDeviceReset.Text = "Reset";
             this.btnDeviceReset.UseVisualStyleBackColor = true;
             this.btnDeviceReset.Click += new System.EventHandler(this.btnDeviceReset_Click);
+            // 
+            // btnDeviceVramWrite
+            // 
+            this.btnDeviceVramWrite.Enabled = false;
+            this.btnDeviceVramWrite.Location = new System.Drawing.Point(19, 266);
+            this.btnDeviceVramWrite.Name = "btnDeviceVramWrite";
+            this.btnDeviceVramWrite.Size = new System.Drawing.Size(75, 23);
+            this.btnDeviceVramWrite.TabIndex = 15;
+            this.btnDeviceVramWrite.Text = "Vram Write";
+            this.btnDeviceVramWrite.UseVisualStyleBackColor = true;
+            this.btnDeviceVramWrite.Click += new System.EventHandler(this.btnDeviceVramWrite_Click);
             // 
             // SoC
             // 
@@ -539,6 +552,7 @@
         public System.Windows.Forms.CheckBox chkMemoryDisplay;
         public System.Windows.Forms.CheckBox chkRegisterDisplay;
         public System.Windows.Forms.ListView lstBinary;
+        private System.Windows.Forms.Button btnDeviceVramWrite;
     }
 }
 
