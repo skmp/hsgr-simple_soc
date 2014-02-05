@@ -17,22 +17,26 @@ Registers
 commands
 --------
 
-8:0 -> read addr[0]         -> 0:addr[0]
-8:1 -> read addr[1]         -> 1:addr[1]
-8:2 -> read addr[2]         -> 2:addr[2]
-8:3 -> read addr[3]         -> 3:addr[3]
+0x80 -> read addr[0]         -> 0:addr[0]
+0x81 -> read addr[1]         -> 1:addr[1]
+0x82 -> read addr[2]         -> 2:addr[2]
+0x83 -> read addr[3]         -> 3:addr[3]
 
-8:4 -> read data[0]         -> 4:data[0]
-8:5 -> read data[1]         -> 5:data[1]
-8:6 -> read data[2]         -> 6:data[2]
-8:7 -> read data[3]         -> 7:data[3]
+0x84 -> read data[0]         -> 4:data[0]
+0x85 -> read data[1]         -> 5:data[1]
+0x86 -> read data[2]         -> 6:data[2]
+0x87 -> read data[3]         -> 7:data[3]
 
-8:8 -> read mem to data     -> echo
-8:9 -> write data to mem    -> echo
+0x90 -> read ram to data     -> echo
+0x91 -> write data to ram    -> echo
 
-9:n  -> reg[n] = data       -> echo
-10:n -> data = reg[n]       -> echo
+0x92 -> read vram to data     -> echo
+0x93 -> write data to vram    -> echo
 
+0x94  -> reg[addr] = data       -> echo
+0x95 -> data = reg[addr]       -> echo
+
+/*
 11:0 -> reset = 0           -> echo
 11:1 -> reset = 1           -> echo
 
@@ -41,3 +45,4 @@ commands
 11:4 -> step                -> echo
 11:5 -> pc = data           -> echo
 11:6 -> data = pc           -> echo
+*/
